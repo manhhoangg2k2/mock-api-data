@@ -1,0 +1,13 @@
+{
+  "name": "devmock",
+  "private": true,
+  "scripts": {
+    "build": "pnpm --filter @devmock/shared build && pnpm --filter @devmock/api build",
+    "dev": "pnpm --filter @devmock/shared build && pnpm --filter @devmock/api dev",
+    "start": "pnpm --filter @devmock/api start",
+    "db:push": "pnpm --filter @devmock/api db:push",
+    "db:seed": "pnpm --filter @devmock/api db:seed",
+    "db:studio": "pnpm --filter @devmock/api db:studio"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
