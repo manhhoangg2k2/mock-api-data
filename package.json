@@ -3,7 +3,10 @@
   "private": true,
   "scripts": {
     "build": "pnpm --filter @devmock/shared build && pnpm --filter @devmock/api build",
+    "build:web": "pnpm --filter @devmock/web build",
     "dev": "pnpm --filter @devmock/shared build && pnpm --filter @devmock/api dev",
+    "dev:web": "pnpm --filter @devmock/web dev",
+    "dev:api": "pnpm --filter @devmock/shared build && pnpm --filter @devmock/api dev",
     "start": "pnpm --filter @devmock/api start",
     "db:push": "pnpm --filter @devmock/api db:push",
     "db:seed": "pnpm --filter @devmock/api db:seed",

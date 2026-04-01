@@ -1,4 +1,5 @@
-import type { FieldChaos, FieldDef } from "@devmock/shared";
+import type { Faker } from "@faker-js/faker";
+import type { FieldChaos, FieldDef } from "../deps/shared.js";
 import { happyValue } from "./faker-map.js";
 import { pickEdge } from "./edge-bank.js";
 
@@ -17,13 +18,13 @@ function normalizePercents(c: FieldChaos | undefined) {
   return { omit: omit * scale, nullP: nullP * scale, edge: edge * scale };
 }
 
-export function resolveField(field: FieldDef): FieldOutcome {
+export function resolveField(field: FieldDef, faker: Faker): FieldOutcome {
   const { omit, nullP, edge } = normalizePercents(field.chaos);
   const r = Math.random() * 100;
   if (r < omit) return { kind: "omit" };
   if (r < omit + nullP) return { kind: "null" };
   if (r < omit + nullP + edge) return { kind: "edge", value: pickEdge(field.chaos?.edgePreset) };
-  return { kind: "happy", value: happyValue(field) };
+  return { kind: "happy", value: happyValue(field, faker) };
 }
 
 export type ChaosMeta = { path: string; kind: string };
@@ -32,11 +33,12 @@ export function buildObject(
   fields: FieldDef[],
   acc: Record<string, unknown>,
   chaos: ChaosMeta[],
+  faker: Faker,
   prefix = ""
 ) {
   for (const field of fields) {
     const path = prefix ? `${prefix}.${field.key}` : field.key;
-    const out = resolveField(field);
+    const out = resolveField(field, faker);
     if (out.kind === "omit") continue;
     if (out.kind === "null") {
       acc[field.key] = null;

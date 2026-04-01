@@ -38,6 +38,8 @@ async function main() {
     .insert(users)
     .values({
       username: "demo",
+      email: null,
+      passwordHash: null,
       webhookToken: DEMO_WEBHOOK_TOKEN,
     })
     .returning();
