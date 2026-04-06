@@ -1,4 +1,4 @@
-import { and, count, eq } from "drizzle-orm";
+import { and, asc, count, eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { parseSchemaConfig } from "../deps/shared.js";
 import { ZodError, z } from "zod";
@@ -82,7 +82,24 @@ export async function registerV1DashboardRoutes(app: FastifyInstance) {
 
   app.get("/v1/projects", auth, async (request) => {
     const userId = (request.user as { sub: string }).sub;
-    return db.select().from(projects).where(eq(projects.userId, userId));
+    const rows = await db
+      .select({
+        id: projects.id,
+        userId: projects.userId,
+        name: projects.name,
+        slug: projects.slug,
+        createdAt: projects.createdAt,
+        endpointCount: count(endpoints.id),
+      })
+      .from(projects)
+      .leftJoin(endpoints, eq(endpoints.projectId, projects.id))
+      .where(eq(projects.userId, userId))
+      .groupBy(projects.id, projects.userId, projects.name, projects.slug, projects.createdAt)
+      .orderBy(asc(projects.createdAt));
+    return rows.map((r) => ({
+      ...r,
+      endpointCount: Number(r.endpointCount ?? 0),
+    }));
   });
 
   app.post("/v1/projects", auth, async (request, reply) => {

@@ -8,6 +8,7 @@ import { EndpointCreatePanel } from "@/components/endpoint/EndpointCreatePanel";
 import { EndpointsTable } from "@/components/dashboard/EndpointsTable";
 import { FieldError } from "@/components/ui/field-error";
 import { AppLoadingScreen } from "@/components/ui/AppLoadingScreen";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 type ProjectRow = { id: string; name: string; slug: string };
 type EndpointRow = {
@@ -31,6 +32,7 @@ export function ProjectDetail() {
   const [endpointQuotas, setEndpointQuotas] = useState<EndpointQuotas | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [endpointToDeleteId, setEndpointToDeleteId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     if (!projectId) return;
@@ -65,8 +67,14 @@ export function ProjectDetail() {
     createPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  async function removeEndpoint(id: string) {
-    if (!confirm("Xóa endpoint này?")) return;
+  function removeEndpoint(id: string) {
+    setEndpointToDeleteId(id);
+  }
+
+  async function confirmDeleteEndpoint() {
+    const id = endpointToDeleteId;
+    if (!id) return;
+    setEndpointToDeleteId(null);
     setErr(null);
     try {
       await apiFetch(`/v1/endpoints/${id}`, { method: "DELETE" });
@@ -97,6 +105,9 @@ export function ProjectDetail() {
   }
 
   const initial = project.name.trim().charAt(0).toUpperCase() || "P";
+  const endpointPendingDelete = endpointToDeleteId
+    ? endpoints.find((e) => e.id === endpointToDeleteId)
+    : undefined;
 
   return (
     <div className="space-y-8">
@@ -192,6 +203,21 @@ export function ProjectDetail() {
           onError={setErr}
         />
       </div>
+
+      <ConfirmDialog
+        open={endpointToDeleteId !== null}
+        title="Xóa endpoint?"
+        message={
+          endpointPendingDelete
+            ? `Endpoint \`${endpointPendingDelete.pathNormalized}\` sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác.`
+            : "Endpoint này sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác."
+        }
+        variant="danger"
+        confirmLabel="Xóa"
+        cancelLabel="Hủy"
+        onConfirm={() => void confirmDeleteEndpoint()}
+        onCancel={() => setEndpointToDeleteId(null)}
+      />
     </div>
   );
 }

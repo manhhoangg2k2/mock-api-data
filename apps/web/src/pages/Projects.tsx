@@ -14,6 +14,8 @@ type ProjectRow = {
   name: string;
   slug: string;
   createdAt: string;
+  /** Số endpoint — do GET /v1/projects trả về (một query). */
+  endpointCount?: number;
 };
 
 function ProjectCard({
@@ -63,7 +65,6 @@ export function Projects() {
   const { user } = useAuth();
   const toast = useToast();
   const [list, setList] = useState<ProjectRow[]>([]);
-  const [endpointCounts, setEndpointCounts] = useState<Record<string, number>>({});
   const [descriptionById, setDescriptionById] = useState<Record<string, string>>({});
   const [dialogOpen, setDialogOpen] = useState(false);
   const [err, setErr] = useState<string | null>(null);
@@ -89,29 +90,6 @@ export function Projects() {
   useEffect(() => {
     void load();
   }, [load]);
-
-  useEffect(() => {
-    if (!list.length) {
-      setEndpointCounts({});
-      return;
-    }
-    let cancelled = false;
-    void Promise.all(
-      list.map(async (p) => {
-        try {
-          const eps = await apiFetch<unknown[]>(`/v1/projects/${p.id}/endpoints`);
-          return [p.id, Array.isArray(eps) ? eps.length : 0] as const;
-        } catch {
-          return [p.id, 0] as const;
-        }
-      })
-    ).then((pairs) => {
-      if (!cancelled) setEndpointCounts(Object.fromEntries(pairs));
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [list]);
 
   async function createFromDialog(payload: { name: string; description: string }) {
     setErr(null);
@@ -192,10 +170,10 @@ export function Projects() {
       ) : (
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {list.map((p) => {
-            const n = endpointCounts[p.id];
-            const countLabel = n === undefined ? "…" : String(n);
+            const n = p.endpointCount ?? 0;
+            const countLabel = String(n);
             const desc = descriptionById[p.id];
-            const endpointText = countLabel === "…" ? "… endpoints" : `${countLabel} endpoints`;
+            const endpointText = `${countLabel} endpoints`;
             const d = new Date(p.createdAt);
             const dateLabel = d.toLocaleDateString("vi-VN");
 

@@ -83,46 +83,50 @@ export function SchemaFieldDense({
 
   return (
     <div className="border-b border-zinc-800/90 last:border-b-0">
-      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_28px] items-center gap-1.5 px-2 py-1.5">
+      <div className="grid grid-cols-1 items-center gap-2 px-2 py-1.5 sm:grid-cols-[minmax(0,1fr)_9.5rem_10.75rem_28px] sm:gap-1.5">
         <input
           value={row.key}
           onChange={(e) => onChange({ ...row, key: e.target.value })}
           placeholder="field_key"
           className={inputSm + " min-w-0 font-mono"}
         />
-        <div className="grid min-w-0 grid-cols-2 gap-1.5">
-          <NativeSelect
-            ui="zinc"
-            value={row.type}
-            onChange={(e) =>
-              onChange({ ...row, type: e.target.value as FieldFormRow["type"], faker: "" })
-            }
-            className="!min-h-8 min-w-0 !rounded-md !py-1 !text-xs"
-          >
-            {FIELD_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {TYPE_LABELS_VI[t] ?? t}
-              </option>
-            ))}
-          </NativeSelect>
-          <NativeSelect
-            ui="zinc"
-            value={row.faker}
-            onChange={(e) => onChange({ ...row, faker: e.target.value })}
-            className="!min-h-8 min-w-0 !rounded-md !py-1 !text-xs"
-          >
-            <option value="">Faker…</option>
-            {fakerHints.map((h) => (
-              <option key={h} value={h}>
-                {FAKER_LABELS_VI[h] ?? h}
-              </option>
-            ))}
-          </NativeSelect>
+        <div className="grid min-w-0 grid-cols-2 gap-1.5 sm:contents">
+          <div className="min-w-0 w-full sm:w-[9.5rem] sm:justify-self-stretch">
+            <NativeSelect
+              ui="zinc"
+              value={row.type}
+              onChange={(e) =>
+                onChange({ ...row, type: e.target.value as FieldFormRow["type"], faker: "" })
+              }
+              className="!min-h-8 !w-full min-w-0 !rounded-md !py-1 !text-xs"
+            >
+              {FIELD_TYPES.map((t) => (
+                <option key={t} value={t}>
+                  {TYPE_LABELS_VI[t] ?? t}
+                </option>
+              ))}
+            </NativeSelect>
+          </div>
+          <div className="min-w-0 w-full sm:w-[10.75rem] sm:justify-self-stretch">
+            <NativeSelect
+              ui="zinc"
+              value={row.faker}
+              onChange={(e) => onChange({ ...row, faker: e.target.value })}
+              className="!min-h-8 !w-full min-w-0 !rounded-md !py-1 !text-xs"
+            >
+              <option value="">Faker…</option>
+              {fakerHints.map((h) => (
+                <option key={h} value={h}>
+                  {FAKER_LABELS_VI[h] ?? h}
+                </option>
+              ))}
+            </NativeSelect>
+          </div>
         </div>
         <button
           type="button"
           onClick={onRemove}
-          className="flex h-7 w-7 items-center justify-center rounded-md text-zinc-500 hover:bg-zinc-800 hover:text-rose-400"
+          className="flex h-7 w-7 items-center justify-center justify-self-start rounded-md text-zinc-500 hover:bg-zinc-800 hover:text-rose-400 sm:justify-self-center"
           aria-label="Xóa field"
         >
           <IconTrash size={14} />

@@ -65,8 +65,8 @@ export function SchemaFieldRow({
 
   return (
     <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="min-w-[100px] flex-1 space-y-1.5">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_10.5rem_11.5rem_2.75rem] sm:items-end sm:gap-3">
+        <label className="min-w-0 space-y-1.5">
           <span className="text-xs text-zinc-400">Key</span>
           <input
             value={row.key}
@@ -75,7 +75,7 @@ export function SchemaFieldRow({
             className="min-h-10 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25"
           />
         </label>
-        <label className="min-w-[130px] flex-1 space-y-1.5">
+        <label className="min-w-0 w-full space-y-1.5 sm:w-[10.5rem] sm:max-w-[10.5rem]">
           <span className="text-xs text-zinc-400">Kiểu</span>
           <NativeSelect
             ui="surfaceRaised"
@@ -83,6 +83,7 @@ export function SchemaFieldRow({
             onChange={(e) =>
               onChange({ ...row, type: e.target.value as FieldFormRow["type"], faker: "" })
             }
+            className="min-w-0"
           >
             {FIELD_TYPES.map((t) => (
               <option key={t} value={t}>
@@ -91,12 +92,13 @@ export function SchemaFieldRow({
             ))}
           </NativeSelect>
         </label>
-        <label className="min-w-[140px] flex-1 space-y-1.5">
+        <label className="min-w-0 w-full space-y-1.5 sm:w-[11.5rem] sm:max-w-[11.5rem]">
           <span className="text-xs text-zinc-400">Faker</span>
           <NativeSelect
             ui="surfaceRaised"
             value={row.faker}
             onChange={(e) => onChange({ ...row, faker: e.target.value })}
+            className="min-w-0"
           >
             <option value="">Mặc định</option>
             {fakerHints.map((h) => (
@@ -109,7 +111,7 @@ export function SchemaFieldRow({
         <button
           type="button"
           onClick={onRemove}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-800 text-zinc-500 hover:border-red-900/50 hover:bg-red-950/20 hover:text-red-400"
+          className="inline-flex h-10 w-10 shrink-0 items-center justify-center justify-self-start rounded-xl border border-zinc-800 text-zinc-500 hover:border-red-900/50 hover:bg-red-950/20 hover:text-red-400 sm:justify-self-end"
           aria-label="Xóa field"
         >
           <IconTrash size={16} />

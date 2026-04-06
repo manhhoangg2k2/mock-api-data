@@ -1,6 +1,8 @@
 import "./load-env.js";
+import { sql } from "drizzle-orm";
 import Fastify from "fastify";
 import cors from "@fastify/cors";
+import { db } from "./db/client.js";
 import { registerJwtAuth } from "./plugins/jwt-auth.js";
 import { registerAuthRoutes } from "./routes/auth-routes.js";
 import { registerMetaRoutes } from "./routes/meta-routes.js";
@@ -28,6 +30,13 @@ async function main() {
   await registerV1DashboardRoutes(app);
   await app.register(mockApiRoutes);
   await app.register(guestMockRoutes);
+
+  try {
+    await db.execute(sql`select 1`);
+    app.log.info("Database pool warmed");
+  } catch (e) {
+    app.log.warn({ err: e }, "Database warm-up failed; first request may be slower");
+  }
 
   await app.listen({ port, host: "0.0.0.0" });
   app.log.info(`Listening on http://0.0.0.0:${port}`);
