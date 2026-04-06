@@ -505,7 +505,7 @@ export function GuestGenerator() {
                   </button>
                 </div>
 
-                <div className="mb-4 grid gap-2 sm:grid-cols-3 text-zinc-500">
+                <div className="mb-4 grid grid-cols-1 gap-2 text-zinc-500 sm:grid sm:grid-cols-[minmax(0,1fr)_10.5rem_11.5rem_2.75rem] sm:items-center sm:gap-3">
                   <InlineLegendLabel
                     label="Key"
                     hintTitle='Tên field sẽ trở thành key trong JSON response (ví dụ: email → "email": ...).'
@@ -521,54 +521,61 @@ export function GuestGenerator() {
                     hintTitle='Faker hint để sinh dữ liệu "đẹp" cho field theo kiểu đó.'
                     hintAriaLabel="Giải thích cột Faker"
                   />
+                  <span className="hidden sm:block" aria-hidden="true" />
                 </div>
 
                 <ul className="space-y-3">
                   {fields.map((f) => (
                     <li
                       key={f.clientId}
-                      className="rounded-xl border border-zinc-800/90 bg-zinc-950/40 p-3 sm:flex sm:items-center sm:gap-3"
+                      className="grid grid-cols-1 gap-2 rounded-xl border border-zinc-800/90 bg-zinc-950/40 p-3 sm:grid-cols-[minmax(0,1fr)_10.5rem_11.5rem_2.75rem] sm:items-center sm:gap-3"
                     >
                       <input
                         aria-label="Key"
                         value={f.key}
                         onChange={(e) => updateField(f.clientId, { key: e.target.value })}
-                        className="min-h-10 min-w-0 flex-1 rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 font-mono text-sm text-zinc-200 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30"
+                        className="min-h-10 min-w-0 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 font-mono text-sm text-zinc-200 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30"
                         placeholder="email"
                       />
-                      <NativeSelect
-                        aria-label="Kiểu dữ liệu"
-                        value={f.type}
-                        onChange={(e) => updateField(f.clientId, { type: e.target.value as FieldFormRow["type"] })}
-                        ui="zincCompact"
-                      >
-                        {FIELD_TYPES.map((t) => (
-                          <option key={t} value={t}>
-                            {TYPE_LABELS_VI[t] ?? t}
-                          </option>
-                        ))}
-                      </NativeSelect>
+                      <div className="min-w-0 w-full sm:w-[10.5rem] sm:max-w-[10.5rem] sm:justify-self-stretch">
+                        <NativeSelect
+                          aria-label="Kiểu dữ liệu"
+                          value={f.type}
+                          onChange={(e) => updateField(f.clientId, { type: e.target.value as FieldFormRow["type"] })}
+                          ui="zincCompact"
+                          className="!mt-0 !w-full sm:!w-full"
+                        >
+                          {FIELD_TYPES.map((t) => (
+                            <option key={t} value={t}>
+                              {TYPE_LABELS_VI[t] ?? t}
+                            </option>
+                          ))}
+                        </NativeSelect>
+                      </div>
 
-                      <NativeSelect
-                        aria-label="Faker"
-                        value={f.faker}
-                        onChange={(e) => updateField(f.clientId, { faker: e.target.value })}
-                        ui="zincCompact"
-                        disabled={loadingHints}
-                      >
-                        <option value="">Mặc định</option>
-                        {hints.fakerHints.map((h) => (
-                          <option key={h} value={h}>
-                            {FAKER_LABELS_VI[h] ?? h}
-                          </option>
-                        ))}
-                      </NativeSelect>
+                      <div className="min-w-0 w-full sm:w-[11.5rem] sm:max-w-[11.5rem] sm:justify-self-stretch">
+                        <NativeSelect
+                          aria-label="Faker"
+                          value={f.faker}
+                          onChange={(e) => updateField(f.clientId, { faker: e.target.value })}
+                          ui="zincCompact"
+                          disabled={loadingHints}
+                          className="!mt-0 !w-full sm:!w-full"
+                        >
+                          <option value="">Mặc định</option>
+                          {hints.fakerHints.map((h) => (
+                            <option key={h} value={h}>
+                              {FAKER_LABELS_VI[h] ?? h}
+                            </option>
+                          ))}
+                        </NativeSelect>
+                      </div>
 
                       <button
                         type="button"
                         onClick={() => removeField(f.clientId)}
                         disabled={fields.length <= 1}
-                        className="mt-2 inline-flex h-10 w-10 shrink-0 items-center justify-center self-start rounded-lg border border-zinc-800 text-zinc-400 transition-colors hover:border-rose-500/40 hover:bg-rose-950/30 hover:text-rose-200 disabled:cursor-not-allowed disabled:opacity-40 sm:mt-0 sm:self-center"
+                        className="inline-flex h-10 w-10 shrink-0 items-center justify-center justify-self-start rounded-lg border border-zinc-800 text-zinc-400 transition-colors hover:border-rose-500/40 hover:bg-rose-950/30 hover:text-rose-200 disabled:cursor-not-allowed disabled:opacity-40 sm:justify-self-end"
                         aria-label="Xóa field"
                       >
                         <Trash2 className="h-4 w-4 shrink-0" />
