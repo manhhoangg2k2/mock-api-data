@@ -4,6 +4,7 @@ import { ApiError } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { FieldError } from "@/components/ui/field-error";
+import { AppLoadingScreen } from "@/components/ui/AppLoadingScreen";
 
 const SLUG_PATTERN = "[a-z0-9]+(?:-[a-z0-9]+)*";
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])?$/;
@@ -280,6 +281,14 @@ export function AuthPage() {
 
   if (ready && token) {
     return <Navigate to={from} replace />;
+  }
+
+  if (!ready) {
+    return (
+      <div className="flex min-h-[calc(100dvh-4rem)] w-full items-center justify-center bg-zinc-950">
+        <AppLoadingScreen layout="compact" message="Đang tải phiên đăng nhập…" />
+      </div>
+    );
   }
 
   return (

@@ -7,6 +7,7 @@ import { LandingFooter } from "@/components/landing/LandingFooter";
 import { GuestGenerator } from "@/components/landing/GuestGenerator";
 import { LandingHero } from "@/components/landing/LandingHero";
 import { LandingPricing } from "@/components/landing/LandingPricing";
+import { AppLoadingScreen } from "@/components/ui/AppLoadingScreen";
 
 /** Ngưỡng scroll-spy: ≥ scroll-mt-24 của #pricing (+ slack). */
 const LANDING_PRICING_HASH_TOP_PX = 132;
@@ -70,11 +71,7 @@ export function LandingPage() {
   }, [ready, token, loc.pathname, navigate]);
 
   if (!ready) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-zinc-950 text-sm text-zinc-500">
-        Đang tải…
-      </div>
-    );
+    return <AppLoadingScreen layout="fullscreen" message="Đang chuẩn bị giao diện…" />;
   }
 
   if (token) {

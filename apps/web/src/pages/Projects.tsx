@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { NewProjectDialog } from "@/components/dashboard/NewProjectDialog";
 import { FieldError } from "@/components/ui/field-error";
+import { ProjectListSkeleton } from "@/components/ui/AppLoadingScreen";
 import { slugifyProjectName, withSlugSuffix } from "@/lib/slugify";
 
 type ProjectRow = {
@@ -181,7 +182,7 @@ export function Projects() {
       ) : null}
 
       {loading ? (
-        <p className="text-sm text-zinc-400">Đang tải…</p>
+        <ProjectListSkeleton count={6} />
       ) : list.length === 0 ? (
         <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900/50 px-6 py-16 text-center">
           <Box className="mx-auto h-10 w-10 text-zinc-600" aria-hidden />

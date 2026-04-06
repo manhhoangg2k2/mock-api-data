@@ -7,6 +7,7 @@ import { useToast } from "@/context/ToastContext";
 import { EndpointCreatePanel } from "@/components/endpoint/EndpointCreatePanel";
 import { EndpointsTable } from "@/components/dashboard/EndpointsTable";
 import { FieldError } from "@/components/ui/field-error";
+import { AppLoadingScreen } from "@/components/ui/AppLoadingScreen";
 
 type ProjectRow = { id: string; name: string; slug: string };
 type EndpointRow = {
@@ -87,7 +88,9 @@ export function ProjectDetail() {
   const mockUrlPrefix = `${String(apiOrigin).replace(/\/+$/, "")}/api/${publicSlug}`;
 
   if (loading) {
-    return <p className="text-sm text-zinc-500">Đang tải…</p>;
+    return (
+      <AppLoadingScreen layout="compact" message="Đang tải dự án…" />
+    );
   }
   if (!project || !projectId) {
     return <FieldError message={err ?? "Không tìm thấy project."} className="text-sm" />;

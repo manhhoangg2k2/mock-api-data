@@ -6,6 +6,7 @@ import { useToast } from "@/context/ToastContext";
 import { EndpointConfigForm } from "@/components/endpoint/EndpointConfigForm";
 import { PreviewAside } from "@/components/endpoint/PreviewAside";
 import { FieldError } from "@/components/ui/field-error";
+import { AppLoadingScreen } from "@/components/ui/AppLoadingScreen";
 import {
   DEFAULT_CUSTOM_TEMPLATE_JSON,
   FALLBACK_HINTS,
@@ -433,7 +434,7 @@ export function EndpointEditorPage() {
         <Link to={`/projects/${projectId}`} className="text-sm text-violet-400/90 hover:underline">
           ← Quay lại project
         </Link>
-        <p className="text-sm text-zinc-500">Đang tải endpoint…</p>
+        <AppLoadingScreen layout="compact" message="Đang tải endpoint…" />
       </div>
     );
   }
