@@ -1,4 +1,3 @@
-/** Khớp `fieldTypeSchema` trong @devmock/shared */
 export type FieldTypeInner =
   | "string"
   | "number"
@@ -172,12 +171,62 @@ export type ResponseTemplatePresetMeta = {
   description: string;
 };
 
-export function newFieldRow(partial?: Partial<Pick<FieldFormRow, "key" | "type" | "faker">>): FieldFormRow {
+/**
+ * Ba tỷ lệ (bỏ trường / null / giá trị xấu) không vượt quá 100% tổng;
+ * phần còn lại → sinh dữ liệu chuẩn (Faker). Thay đổi một thanh sẽ tự giới hạn các thanh sau.
+ */
+export function applyOmitPercent(row: FieldFormRow, omit: number): FieldFormRow {
+  const o = Math.min(100, Math.max(0, Math.round(omit)));
+  const maxN = 100 - o;
+  const n = Math.min(row.nullPercent, maxN);
+  const maxE = 100 - o - n;
+  const e = Math.min(row.edgePercent, maxE);
+  return { ...row, omitPercent: o, nullPercent: n, edgePercent: e };
+}
+
+export function applyNullPercent(row: FieldFormRow, nullP: number): FieldFormRow {
+  const maxN = 100 - row.omitPercent;
+  const n = Math.min(maxN, Math.max(0, Math.round(nullP)));
+  const maxE = 100 - row.omitPercent - n;
+  const e = Math.min(row.edgePercent, maxE);
+  return { ...row, nullPercent: n, edgePercent: e };
+}
+
+export function applyEdgePercent(row: FieldFormRow, edge: number): FieldFormRow {
+  const maxE = 100 - row.omitPercent - row.nullPercent;
+  const e = Math.min(maxE, Math.max(0, Math.round(edge)));
+  return { ...row, edgePercent: e };
+}
+
+/** Chuẩn hóa từ API: nếu tổng > 100, scale như backend; nếu ≤ 100 giữ nguyên. */
+export function normalizeFieldPercentsFromApi(
+  omit: number,
+  nullP: number,
+  edge: number
+): Pick<FieldFormRow, "omitPercent" | "nullPercent" | "edgePercent"> {
+  let o = Math.min(100, Math.max(0, Math.round(omit)));
+  let n = Math.min(100, Math.max(0, Math.round(nullP)));
+  let e = Math.min(100, Math.max(0, Math.round(edge)));
+  const sum = o + n + e;
+  if (sum === 0) return { omitPercent: 0, nullPercent: 0, edgePercent: 0 };
+  if (sum <= 100) return { omitPercent: o, nullPercent: n, edgePercent: e };
+  const scale = 100 / sum;
+  let o2 = Math.round(o * scale);
+  let n2 = Math.round(n * scale);
+  let e2 = 100 - o2 - n2;
+  if (e2 < 0) {
+    e2 = 0;
+    n2 = Math.max(0, 100 - o2);
+  }
+  return { omitPercent: o2, nullPercent: n2, edgePercent: e2 };
+}
+
+export function newFieldRow(partial?: Partial<Omit<FieldFormRow, "clientId">>): FieldFormRow {
   return {
     clientId: crypto.randomUUID(),
-    key: partial?.key ?? "",
-    type: partial?.type ?? "string",
-    faker: partial?.faker ?? "",
+    key: "",
+    type: "string",
+    faker: "",
     omitPercent: 0,
     nullPercent: 0,
     edgePercent: 0,
@@ -199,6 +248,8 @@ export type BuildSchemaInput = {
   paginationEnabled: boolean;
   paginationTotal: number;
   pageSizeDefault: number;
+  /** Trang mặc định (1-based) khi không có ?page= */
+  paginationDefaultPage: number;
   arrayItemCount: number;
   dataLocale: string;
   responseTemplateId: ResponseTemplateIdStr;
@@ -239,10 +290,18 @@ export function buildSchemaConfigFromForm(input: BuildSchemaInput): Record<strin
   }
 
   if (input.paginationEnabled) {
+    const totalCount = Math.max(1, Math.floor(input.paginationTotal) || 1_000_000);
+    const pageSizeDefault = Math.min(100, Math.max(1, Math.floor(input.pageSizeDefault) || 20));
+    const maxPage = Math.max(1, Math.ceil(totalCount / pageSizeDefault));
+    const defaultPage = Math.min(
+      Math.max(1, Math.floor(input.paginationDefaultPage) || 1),
+      maxPage
+    );
     out.virtualPagination = {
       enabled: true,
-      totalCount: Math.max(1, Math.floor(input.paginationTotal) || 1_000_000),
-      pageSizeDefault: Math.min(100, Math.max(1, Math.floor(input.pageSizeDefault) || 20)),
+      totalCount,
+      pageSizeDefault,
+      defaultPage,
     };
   } else if (input.responseShape === "array") {
     out.arrayItemCount = Math.min(100, Math.max(1, Math.floor(input.arrayItemCount) || 1));
@@ -333,6 +392,27 @@ export function validateEndpointForm(
 
 export type StatusRouletteRow = { clientId: string; code: number; weight: number };
 
+/** Các mã HTTP thường dùng cho status roulette (kèm mô tả tiếng Việt). */
+export const ROULETTE_HTTP_PRESETS = [
+  { code: 200, label: "OK", description: "Thành công, có body" },
+  { code: 201, label: "Created", description: "Đã tạo tài nguyên mới" },
+  { code: 204, label: "No Content", description: "Thành công, không trả body" },
+  { code: 400, label: "Bad Request", description: "Request không hợp lệ / sai định dạng" },
+  { code: 401, label: "Unauthorized", description: "Chưa xác thực hoặc token hết hạn" },
+  { code: 403, label: "Forbidden", description: "Đã xác thực nhưng không có quyền" },
+  { code: 404, label: "Not Found", description: "Không tìm thấy tài nguyên" },
+  { code: 409, label: "Conflict", description: "Xung đột (ví dụ bản ghi trùng)" },
+  { code: 422, label: "Unprocessable Entity", description: "Lỗi validation nghiệp vụ" },
+  { code: 429, label: "Too Many Requests", description: "Vượt giới hạn tần suất gọi API" },
+  { code: 500, label: "Internal Server Error", description: "Lỗi không mong đợi phía server" },
+  { code: 502, label: "Bad Gateway", description: "Gateway / upstream phản hồi lỗi" },
+  { code: 503, label: "Service Unavailable", description: "Dịch vụ tạm ngưng / quá tải" },
+] as const;
+
+export const ROULETTE_PRESET_CODE_SET: Set<number> = new Set(
+  ROULETTE_HTTP_PRESETS.map((p) => p.code)
+);
+
 export function newRouletteRow(code = 200, weight = 100): StatusRouletteRow {
   return { clientId: crypto.randomUUID(), code, weight };
 }
@@ -376,4 +456,99 @@ export function applyResponsePreset(
     default:
       break;
   }
+}
+
+const EDITOR_DEFAULT_CUSTOM_JSON = `{
+  "code": 0,
+  "message": "success",
+  "data": "$body"
+}`;
+
+export type EditorFormFromSchema = {
+  responsePreset: ResponsePresetId;
+  responseShape: "object" | "array";
+  fields: FieldFormRow[];
+  paginationEnabled: boolean;
+  paginationTotal: number;
+  pageSizeDefault: number;
+  paginationDefaultPage: number;
+  arrayItemCount: number;
+  dataLocale: string;
+  responseTemplateId: ResponseTemplateIdStr;
+  responseTemplateResourceType: string;
+  responseTemplateCustomJson: string;
+};
+
+/** Đưa schemaConfig từ API về state form editor (đối chiếu buildSchemaConfigFromForm). */
+export function schemaConfigToEditorForm(schemaConfig: unknown): EditorFormFromSchema {
+  const sc = schemaConfig && typeof schemaConfig === "object" ? (schemaConfig as Record<string, unknown>) : {};
+  const responseShape = sc.responseShape === "array" ? "array" : "object";
+  const vp = sc.virtualPagination as
+    | { enabled?: boolean; totalCount?: number; pageSizeDefault?: number; defaultPage?: number }
+    | undefined;
+  const paginationEnabled = Boolean(vp?.enabled);
+  let responsePreset: ResponsePresetId = "custom";
+  if (paginationEnabled) responsePreset = "paginated";
+  else if (responseShape === "array") responsePreset = "array_list";
+  else responsePreset = "single_object";
+
+  const rawFields = Array.isArray(sc.fields) ? sc.fields : [];
+  const fields: FieldFormRow[] =
+    rawFields.length === 0
+      ? defaultEndpointFields()
+      : rawFields.map((item) => {
+          const x = item as Record<string, unknown>;
+          const chaos = x.chaos as Record<string, unknown> | undefined;
+          const t = x.type as string;
+          const type = FIELD_TYPES.includes(t as FieldTypeInner) ? (t as FieldTypeInner) : "string";
+          const pct = normalizeFieldPercentsFromApi(
+            Number(chaos?.omitPercent ?? 0),
+            Number(chaos?.nullPercent ?? 0),
+            Number(chaos?.edgePercent ?? 0)
+          );
+          return newFieldRow({
+            key: String(x.key ?? ""),
+            type,
+            faker: typeof x.faker === "string" ? x.faker : "",
+            ...pct,
+            edgePreset: typeof chaos?.edgePreset === "string" ? chaos.edgePreset : "zalgo_short",
+          });
+        });
+
+  const tid = sc.responseTemplateId;
+  const responseTemplateId: ResponseTemplateIdStr =
+    typeof tid === "string" && (RESPONSE_TEMPLATE_IDS as readonly string[]).includes(tid)
+      ? (tid as ResponseTemplateIdStr)
+      : "none";
+
+  let responseTemplateCustomJson = EDITOR_DEFAULT_CUSTOM_JSON;
+  if (sc.responseTemplateCustom != null) {
+    try {
+      responseTemplateCustomJson = JSON.stringify(sc.responseTemplateCustom, null, 2);
+    } catch {
+      /* keep default */
+    }
+  }
+
+  const pageSizeDefault = Math.min(100, Math.max(1, Number(vp?.pageSizeDefault ?? 20)));
+  const paginationTotal = Math.max(1, Number(vp?.totalCount ?? 1_000_000));
+  const maxPage = Math.max(1, Math.ceil(paginationTotal / pageSizeDefault));
+  const rawDefaultPage = Math.max(1, Math.floor(Number(vp?.defaultPage ?? 1)) || 1);
+  const paginationDefaultPage = Math.min(rawDefaultPage, maxPage);
+
+  return {
+    responsePreset,
+    responseShape,
+    fields,
+    paginationEnabled,
+    paginationTotal,
+    pageSizeDefault,
+    paginationDefaultPage,
+    arrayItemCount: Math.min(100, Math.max(1, Number(sc.arrayItemCount ?? 5))),
+    dataLocale: typeof sc.dataLocale === "string" && sc.dataLocale.trim() ? sc.dataLocale.trim() : "en",
+    responseTemplateId,
+    responseTemplateResourceType:
+      typeof sc.responseTemplateResourceType === "string" ? sc.responseTemplateResourceType : "users",
+    responseTemplateCustomJson,
+  };
 }

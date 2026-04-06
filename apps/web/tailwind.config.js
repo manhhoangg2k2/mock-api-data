@@ -4,18 +4,20 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["DM Sans", "system-ui", "sans-serif"],
-        mono: ["JetBrains Mono", "ui-monospace", "monospace"],
+        /** Vercel Geist — UI sans + code mono */
+        sans: ['"Geist Sans"', "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ['"Geist Mono"', "ui-monospace", "monospace"],
       },
       colors: {
+        /** Đồng bộ với dashboard (zinc) + nhấn violet */
         surface: {
-          DEFAULT: "#0f1419",
-          raised: "#161d27",
-          border: "#243042",
+          DEFAULT: "#09090b",
+          raised: "#18181b",
+          border: "#27272a",
         },
         accent: {
-          DEFAULT: "#38bdf8",
-          muted: "#0ea5e9",
+          DEFAULT: "#8b5cf6",
+          muted: "#a78bfa",
         },
       },
     },

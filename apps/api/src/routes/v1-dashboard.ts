@@ -67,6 +67,19 @@ const previewBody = z.object({
 export async function registerV1DashboardRoutes(app: FastifyInstance) {
   const auth = { onRequest: [app.authenticate] };
 
+  app.get("/v1/me/quotas", auth, async (request) => {
+    const userId = (request.user as { sub: string }).sub;
+    const used = await countEndpoints(userId);
+    const max = MAX_ENDPOINTS_PER_USER;
+    return {
+      endpoints: {
+        used,
+        max,
+        remaining: Math.max(0, max - used),
+      },
+    };
+  });
+
   app.get("/v1/projects", auth, async (request) => {
     const userId = (request.user as { sub: string }).sub;
     return db.select().from(projects).where(eq(projects.userId, userId));

@@ -2,6 +2,8 @@
 
 Monorepo **pnpm**: `apps/api` (Fastify + Postgres), `apps/web` (Vite + React), `packages/shared` (Zod DSL).
 
+**Hướng dẫn chạy & build (tiếng Việt, đầy đủ):** xem [`HUONG_DAN_CHAY_VA_BUILD.md`](./HUONG_DAN_CHAY_VA_BUILD.md).
+
 ---
 
 ## Tài liệu chạy local
@@ -19,7 +21,7 @@ Không cần Docker cho luồng dev mặc định.
 ### 2. Lấy code và cài dependency
 
 ```bash
-cd code
+cd <thư-mục-gốc-monorepo>   # ví dụ: code/mock-api-data
 pnpm install
 ```
 
@@ -27,7 +29,7 @@ Nếu CI/Render báo lockfile lệch: trên máy bạn luôn chạy `pnpm instal
 
 ### 3. Biến môi trường (`.env`)
 
-Tạo file **`code/.env`** (cùng cấp với `package.json` của monorepo):
+Tạo file **`.env`** tại **gốc monorepo** (cùng cấp với `package.json` có script `dev` / `build`):
 
 ```bash
 cp .env.example .env
@@ -41,13 +43,14 @@ Chỉnh nội dung — **không** commit `.env`.
 | `JWT_SECRET` | **Có trên production** | Chuỗi dài ngẫu nhiên để ký JWT; local có thể bỏ qua (API dùng default + cảnh báo log) |
 | `PORT` | Không | API lắng nghe; mặc định **3000** |
 | `VITE_API_ORIGIN` | Không | Chỉ cho **web**: nếu set, trình duyệt gọi thẳng URL này (ví dụ API trên Render). **Để trống** khi dev cùng máy với API + dùng proxy Vite. |
-| `VITE_DEV_API_PROXY` | Không | Mặc định `http://127.0.0.1:3000` — target proxy của Vite cho `/health` và `/api`. Đổi nếu API chạy port khác. |
+| `VITE_DEV_API_PROXY` | Không | Mặc định `http://127.0.0.1:3000` — target proxy của Vite cho `/health`, `/api`, `/v1`. Đổi nếu API chạy port khác. |
+| `VITE_GOOGLE_CLIENT_ID` | Không | Đăng nhập Google trên web (GIS). Trùng app OAuth với `GOOGLE_CLIENT_ID` phía API. |
 
-`drizzle-kit` và API đều đọc `code/.env` (và fallback `apps/api/.env` nếu có).
+`drizzle-kit` và API đều đọc `.env` ở gốc monorepo (và fallback `apps/api/.env` nếu có). Vite cũng load `VITE_*` từ cùng file `.env` đó.
 
 ### 4. Khởi tạo database (một lần / sau khi đổi schema)
 
-Từ thư mục **`code/`**:
+Từ thư mục **gốc monorepo**:
 
 ```bash
 pnpm db:push    # đẩy schema lên Neon (sau khi thêm cột auth: email, password_hash — chạy lại push)
@@ -59,12 +62,11 @@ pnpm db:seed    # user demo + endpoint /api/demo/v1/users
 
 ### 5. Chạy hằng ngày (API + Web)
 
-Cần **hai terminal**, cùng thư mục `code/`.
+Cần **hai terminal**, cùng thư mục gốc monorepo.
 
 **Terminal A — API**
 
 ```bash
-cd code
 pnpm dev
 ```
 
@@ -75,7 +77,6 @@ pnpm dev
 **Terminal B — Web**
 
 ```bash
-cd code
 pnpm dev:web
 ```
 
@@ -100,11 +101,9 @@ Sau khi sửa `.env`, **restart** `pnpm dev:web`.
 ### 7. Build & chạy giống production (API)
 
 ```bash
-cd code
 pnpm build          # shared + api → apps/api/dist
-PORT=3000 node apps/api/dist/index.js
-# hoặc từ root sau build:
-pnpm start
+PORT=3000 pnpm start
+# hoặc: node apps/api/dist/index.js (từ apps/api sau khi build)
 ```
 
 Web static:
@@ -118,7 +117,7 @@ pnpm --filter @devmock/web preview   # xem thử bản build (Vite preview)
 
 | Hiện tượng | Hướng xử lý |
 |------------|-------------|
-| `DATABASE_URL is not set` khi `db:push` | Đặt `code/.env`, kiểm tra tên biến và không có space quanh `=`. |
+| `DATABASE_URL is not set` khi `db:push` | Đặt `.env` ở gốc monorepo, kiểm tra tên biến và không có space quanh `=`. |
 | Web “Ping /health” lỗi | API có đang chạy không? Port 3000 có trùng app khác không? Thử đổi `PORT` + `VITE_DEV_API_PROXY`. |
 | Giao diện báo **ETIMEDOUT** / timeout | **Local:** API (`pnpm dev`) chưa chạy hoặc sai port; **đừng** set `VITE_API_ORIGIN` khi dùng proxy. **Render:** service Free đang sleep — mở `https://…/health` trên trình duyệt, đợi cold start 1–2 phút rồi thử lại. |
 | `pnpm install` trên Render lệch lockfile | Commit `pnpm-lock.yaml` sau `pnpm install` local. |

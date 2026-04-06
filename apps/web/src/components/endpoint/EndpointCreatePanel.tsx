@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { ApiError, apiFetch } from "@/lib/api";
+import { useToast } from "@/context/ToastContext";
 import { IconHelpCircle } from "@/components/ui/icons";
 import {
   DEFAULT_CUSTOM_TEMPLATE_JSON,
@@ -7,7 +9,7 @@ import {
   FALLBACK_TEMPLATE_PRESETS,
   type SchemaHints,
 } from "./constants";
-import { EndpointFormSections } from "./EndpointFormSections";
+import { EndpointConfigForm } from "./EndpointConfigForm";
 import { PreviewAside } from "./PreviewAside";
 import {
   applyResponsePreset,
@@ -22,21 +24,27 @@ import {
   type ResponseTemplateIdStr,
   type StatusRouletteRow,
 } from "./schema-form";
+import { hasPendingEndpointTourAfterAuth } from "@/lib/endpoint-tour-session";
 import { EndpointBuilderTour, hasCompletedTour } from "./tour/EndpointBuilderTour";
 
 type PreviewResponse = { body: unknown; chaos: { path: string; kind: string }[] };
 
 type Props = {
   projectId: string;
+  mockUrlPrefix?: string;
   onCreated: () => void;
   onError: (msg: string | null) => void;
 };
 
-export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
-  const [hints, setHints] = useState<SchemaHints>(FALLBACK_HINTS);
+const FORM_ID = "endpoint-create-form";
+
+export function EndpointCreatePanel({ projectId, mockUrlPrefix, onCreated, onError }: Props) {
+  const toast = useToast();
   const [tourOpen, setTourOpen] = useState(false);
+  const [tourStepIdx, setTourStepIdx] = useState(0);
   const [pathInputFocused, setPathInputFocused] = useState(false);
 
+  const [hints, setHints] = useState<SchemaHints>(FALLBACK_HINTS);
   const [responsePreset, setResponsePreset] = useState<ResponsePresetId>("single_object");
   const [path, setPath] = useState("v1/items");
   const [methods, setMethods] = useState<Set<string>>(new Set(["GET", "OPTIONS"]));
@@ -45,6 +53,7 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
   const [paginationEnabled, setPaginationEnabled] = useState(false);
   const [paginationTotal, setPaginationTotal] = useState(1_000_000);
   const [pageSizeDefault, setPageSizeDefault] = useState(20);
+  const [paginationDefaultPage, setPaginationDefaultPage] = useState(1);
   const [arrayItemCount, setArrayItemCount] = useState(5);
   const [dataLocale, setDataLocale] = useState("en");
   const [responseTemplateId, setResponseTemplateId] = useState<ResponseTemplateIdStr>("none");
@@ -59,17 +68,18 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
     newRouletteRow(200, 100),
   ]);
   const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const [previewLimit, setPreviewLimit] = useState(10);
-  const [previewStressChaos, setPreviewStressChaos] = useState(false);
   const [previewBody, setPreviewBody] = useState<unknown>(null);
   const [previewChaos, setPreviewChaos] = useState<{ path: string; kind: string }[]>([]);
   const [previewLoading, setPreviewLoading] = useState(false);
   const [previewErr, setPreviewErr] = useState<string | null>(null);
   const [previewRolls, setPreviewRolls] = useState<PreviewResponse[] | null>(null);
+  const previewSeqRef = useRef(0);
 
   useEffect(() => {
-    if (!hasCompletedTour()) {
+    if (!hasCompletedTour() && hasPendingEndpointTourAfterAuth()) {
       const t = window.setTimeout(() => setTourOpen(true), 450);
       return () => window.clearTimeout(t);
     }
@@ -98,6 +108,21 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
     };
   }, []);
 
+  useEffect(() => {
+    setFormError(null);
+  }, [path, methods, fields, responseTemplateId, responseTemplateResourceType, responseTemplateCustomJson]);
+
+  useEffect(() => {
+    const pag =
+      responsePreset === "paginated" || (responsePreset === "custom" && paginationEnabled);
+    if (!pag) return;
+    const maxP = Math.max(
+      1,
+      Math.ceil(Math.max(1, paginationTotal) / Math.min(100, Math.max(1, pageSizeDefault)))
+    );
+    setPaginationDefaultPage((n) => Math.min(Math.max(1, n), maxP));
+  }, [responsePreset, paginationEnabled, paginationTotal, pageSizeDefault]);
+
   const templateForm = useMemo(
     () => ({
       id: responseTemplateId,
@@ -115,6 +140,7 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
         paginationEnabled,
         paginationTotal,
         pageSizeDefault,
+        paginationDefaultPage,
         arrayItemCount,
         dataLocale,
         responseTemplateId,
@@ -127,6 +153,7 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
       paginationEnabled,
       paginationTotal,
       pageSizeDefault,
+      paginationDefaultPage,
       arrayItemCount,
       dataLocale,
       responseTemplateId,
@@ -152,6 +179,7 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
       setPreviewRolls(null);
       return;
     }
+    const seq = ++previewSeqRef.current;
     setPreviewLoading(true);
     setPreviewErr(null);
     setPreviewRolls(null);
@@ -166,31 +194,25 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
         json: {
           schemaConfig,
           query: paginationEnabled ? q : undefined,
-          previewStressChaos: previewStressChaos || undefined,
         },
       });
+      if (seq !== previewSeqRef.current) return;
       setPreviewBody(res.body);
       setPreviewChaos(res.chaos ?? []);
+      setPreviewRolls(null);
     } catch (e) {
+      if (seq !== previewSeqRef.current) return;
       if (e instanceof ApiError) {
         const msg = String((e.body as { message?: string })?.message ?? e.message);
         setPreviewErr(msg);
       } else setPreviewErr(String(e));
       setPreviewBody(null);
       setPreviewChaos([]);
+      setPreviewRolls(null);
     } finally {
-      setPreviewLoading(false);
+      if (seq === previewSeqRef.current) setPreviewLoading(false);
     }
-  }, [
-    path,
-    methods,
-    fields,
-    schemaConfig,
-    paginationEnabled,
-    previewLimit,
-    previewStressChaos,
-    templateForm,
-  ]);
+  }, [path, methods, fields, schemaConfig, paginationEnabled, previewLimit, templateForm]);
 
   useEffect(() => {
     const t = window.setTimeout(() => {
@@ -203,8 +225,10 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
     const v = validateEndpointForm(path, methods, fields, templateForm);
     if (v) {
       setPreviewErr(v);
+      setPreviewRolls(null);
       return;
     }
+    const seq = ++previewSeqRef.current;
     setPreviewLoading(true);
     setPreviewErr(null);
     setPreviewBody(null);
@@ -218,21 +242,22 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
       const payload = {
         schemaConfig,
         query: paginationEnabled ? q : undefined,
-        previewStressChaos: previewStressChaos || undefined,
       };
       const rolls = await Promise.all(
         Array.from({ length: n }, () =>
           apiFetch<PreviewResponse>("/v1/preview", { method: "POST", json: payload })
         )
       );
+      if (seq !== previewSeqRef.current) return;
       setPreviewRolls(rolls);
     } catch (e) {
+      if (seq !== previewSeqRef.current) return;
       if (e instanceof ApiError) {
         setPreviewErr(String((e.body as { message?: string })?.message ?? e.message));
       } else setPreviewErr(String(e));
       setPreviewRolls(null);
     } finally {
-      setPreviewLoading(false);
+      if (seq === previewSeqRef.current) setPreviewLoading(false);
     }
   }
 
@@ -275,9 +300,10 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
     e.preventDefault();
     const v = validateEndpointForm(path, methods, fields, templateForm);
     if (v) {
-      onError(v);
+      setFormError(v);
       return;
     }
+    setFormError(null);
     onError(null);
     setSubmitting(true);
     try {
@@ -301,6 +327,7 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
       setPaginationEnabled(false);
       setPaginationTotal(1_000_000);
       setPageSizeDefault(20);
+      setPaginationDefaultPage(1);
       setArrayItemCount(5);
       setDataLocale("en");
       setResponseTemplateId("none");
@@ -311,116 +338,147 @@ export function EndpointCreatePanel({ projectId, onCreated, onError }: Props) {
       setRouletteEnabled(false);
       setRouletteRows([newRouletteRow(200, 100)]);
       setPreviewLimit(10);
-      setPreviewStressChaos(false);
+      setFormError(null);
+      toast.success("Đã tạo endpoint.");
       onCreated();
     } catch (err) {
       if (err instanceof ApiError) {
-        onError(String((err.body as { message?: string })?.message ?? err.message));
-      } else onError(String(err));
+        const m = String((err.body as { message?: string })?.message ?? err.message);
+        setFormError(m);
+        onError(null);
+        toast.error(m);
+      } else {
+        const m = String(err);
+        setFormError(m);
+        onError(null);
+        toast.error(m);
+      }
     } finally {
       setSubmitting(false);
     }
   }
 
+  const formProps = {
+    path,
+    setPath,
+    pathInputFocused,
+    setPathInputFocused,
+    methods,
+    toggleMethod,
+    responsePreset,
+    setPreset,
+    responseShape,
+    paginationEnabled,
+    arrayItemCount,
+    setArrayItemCount,
+    pageSizeDefault,
+    setPageSizeDefault,
+    paginationTotal,
+    setPaginationTotal,
+    paginationDefaultPage,
+    setPaginationDefaultPage,
+    goCustomShape,
+    goCustomPagination,
+    locales,
+    dataLocale,
+    setDataLocale,
+    templatePresets,
+    responseTemplateId,
+    setResponseTemplateId,
+    responseTemplateResourceType,
+    setResponseTemplateResourceType,
+    responseTemplateCustomJson,
+    setResponseTemplateCustomJson,
+    fields,
+    updateField,
+    removeField,
+    addField: () => setFields((r) => [...r, newFieldRow()]),
+    fakerHints: hints.fakerHints,
+    edgePresets: hints.edgePresets,
+    edgeCatalog: hints.edgeCatalog,
+    latencyMin,
+    setLatencyMin,
+    latencyMax,
+    setLatencyMax,
+    rouletteEnabled,
+    setRouletteEnabled,
+    rouletteRows,
+    setRouletteRows,
+    schemaJsonPretty,
+    tourStep: tourOpen ? tourStepIdx : null,
+    mockUrlPrefix,
+    formError,
+  };
+
   return (
     <>
-      <EndpointBuilderTour open={tourOpen} onClose={() => setTourOpen(false)} />
+      <EndpointBuilderTour
+        open={tourOpen}
+        onClose={() => {
+          setTourOpen(false);
+          setTourStepIdx(0);
+        }}
+        onStepChange={setTourStepIdx}
+      />
 
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start lg:gap-12">
-        <form
-          onSubmit={onSubmit}
-          className="space-y-8 rounded-2xl border border-surface-border/60 bg-surface-raised/30 p-6 sm:p-8"
-        >
-          <header className="flex flex-wrap items-start justify-between gap-4 border-b border-surface-border/40 pb-6">
-            <div>
-              <h2 className="text-lg font-medium tracking-tight text-slate-100">Tạo endpoint</h2>
-              <p className="mt-1 max-w-md text-xs text-slate-500">
-                Form gọn; chi tiết nằm sau icon{" "}
-                <IconHelpCircle size={12} className="inline text-slate-500" />.
-              </p>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-stretch lg:gap-6">
+        <div className="flex min-w-0 flex-col rounded-md border border-zinc-800 bg-zinc-950 lg:col-span-3">
+          <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 bg-zinc-950/95 px-3 py-2.5 backdrop-blur-md">
+            <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+              <h2 className="truncate text-sm font-semibold tracking-tight text-zinc-100">
+                Cấu hình Endpoint
+              </h2>
+              <button
+                type="button"
+                onClick={() => setTourOpen(true)}
+                className="inline-flex shrink-0 items-center gap-2 rounded-lg border-2 border-violet-500/65 bg-gradient-to-br from-violet-950/85 to-zinc-900 px-3 py-2 text-xs font-semibold text-violet-100 shadow-md shadow-violet-950/40 ring-1 ring-violet-400/25 transition hover:border-violet-400 hover:from-violet-900/90 hover:text-white"
+                title="Hướng dẫn từng bước — path, body, preview, mô phỏng lỗi…"
+              >
+                <IconHelpCircle size={16} className="text-violet-300" aria-hidden />
+                Hướng dẫn
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => setTourOpen(true)}
-              className="inline-flex items-center gap-2 rounded-xl border border-surface-border/80 bg-surface/50 px-3 py-2 text-xs text-slate-400 hover:border-slate-600 hover:text-slate-200"
-            >
-              <IconHelpCircle size={14} />
-              Hướng dẫn
-            </button>
-          </header>
+            <div className="flex shrink-0 items-center gap-2">
+              <Link
+                to={`/projects/${projectId}`}
+                className="rounded border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+              >
+                Hủy
+              </Link>
+              <button
+                type="submit"
+                form={FORM_ID}
+                disabled={submitting}
+                className="rounded bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-violet-900/30 hover:bg-violet-500 disabled:opacity-50"
+              >
+                {submitting ? "Đang lưu…" : "Lưu endpoint"}
+              </button>
+            </div>
+          </div>
 
-          <EndpointFormSections
-            path={path}
-            setPath={setPath}
-            pathInputFocused={pathInputFocused}
-            setPathInputFocused={setPathInputFocused}
-            methods={methods}
-            toggleMethod={toggleMethod}
-            responsePreset={responsePreset}
-            setPreset={setPreset}
-            responseShape={responseShape}
+          <div className="p-3">
+            <form id={FORM_ID} onSubmit={onSubmit} className="pb-8">
+              <EndpointConfigForm {...formProps} />
+            </form>
+          </div>
+        </div>
+
+        <div className="min-h-0 lg:col-span-2">
+          <PreviewAside
             paginationEnabled={paginationEnabled}
+            responseShape={responseShape}
             arrayItemCount={arrayItemCount}
-            setArrayItemCount={setArrayItemCount}
-            pageSizeDefault={pageSizeDefault}
-            setPageSizeDefault={setPageSizeDefault}
-            paginationTotal={paginationTotal}
-            setPaginationTotal={setPaginationTotal}
-            goCustomShape={goCustomShape}
-            goCustomPagination={goCustomPagination}
-            locales={locales}
-            dataLocale={dataLocale}
-            setDataLocale={setDataLocale}
-            templatePresets={templatePresets}
-            responseTemplateId={responseTemplateId}
-            setResponseTemplateId={setResponseTemplateId}
-            responseTemplateResourceType={responseTemplateResourceType}
-            setResponseTemplateResourceType={setResponseTemplateResourceType}
-            responseTemplateCustomJson={responseTemplateCustomJson}
-            setResponseTemplateCustomJson={setResponseTemplateCustomJson}
-            fields={fields}
-            updateField={updateField}
-            removeField={removeField}
-            addField={() => setFields((r) => [...r, newFieldRow()])}
-            fakerHints={hints.fakerHints}
-            edgePresets={hints.edgePresets}
-            edgeCatalog={hints.edgeCatalog}
-            latencyMin={latencyMin}
-            setLatencyMin={setLatencyMin}
-            latencyMax={latencyMax}
-            setLatencyMax={setLatencyMax}
-            rouletteEnabled={rouletteEnabled}
-            setRouletteEnabled={setRouletteEnabled}
-            rouletteRows={rouletteRows}
-            setRouletteRows={setRouletteRows}
-            schemaJsonPretty={schemaJsonPretty}
+            previewLimit={previewLimit}
+            setPreviewLimit={setPreviewLimit}
+            previewLoading={previewLoading}
+            previewErr={previewErr}
+            previewBody={previewBody}
+            previewChaos={previewChaos}
+            previewRolls={previewRolls}
+            onReroll={() => void runPreview()}
+            onMultiRoll={(n) => void runMultiPreview(n)}
           />
-
-          <button
-            type="submit"
-            disabled={submitting}
-            className="w-full rounded-xl bg-accent py-3 text-sm font-medium text-surface hover:bg-sky-300 disabled:opacity-50 sm:w-auto sm:px-8"
-          >
-            {submitting ? "Đang lưu…" : "Lưu endpoint"}
-          </button>
-        </form>
-
-        <PreviewAside
-          paginationEnabled={paginationEnabled}
-          responseShape={responseShape}
-          arrayItemCount={arrayItemCount}
-          previewLimit={previewLimit}
-          setPreviewLimit={setPreviewLimit}
-          previewStressChaos={previewStressChaos}
-          setPreviewStressChaos={setPreviewStressChaos}
-          previewLoading={previewLoading}
-          previewErr={previewErr}
-          previewBody={previewBody}
-          previewChaos={previewChaos}
-          previewRolls={previewRolls}
-          onReroll={() => void runPreview()}
-          onMultiRoll={(n) => void runMultiPreview(n)}
-        />
+        </div>
       </div>
     </>
   );

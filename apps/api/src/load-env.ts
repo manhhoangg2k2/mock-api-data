@@ -6,14 +6,19 @@ import { fileURLToPath } from "node:url";
 const srcDir = path.dirname(fileURLToPath(import.meta.url));
 const apiDir = path.resolve(srcDir, "..");
 
-const envFiles = [
-  path.resolve(srcDir, "../../../.env"), // code/.env
-  path.resolve(apiDir, ".env"), // apps/api/.env
-  path.resolve(process.cwd(), ".env"),
+const monorepoRoot = path.resolve(apiDir, "..", "..");
+
+const candidateEnvPaths = [
+  path.join(monorepoRoot, ".env"),
+  path.join(apiDir, ".env"),
+  path.join(process.cwd(), ".env"),
+  path.resolve(process.cwd(), "..", "..", ".env"),
 ];
 
-for (const p of envFiles) {
+const uniquePaths = [...new Set(candidateEnvPaths)];
+
+for (const p of uniquePaths) {
   if (fs.existsSync(p)) {
-    config({ path: p });
+    config({ path: p, override: true });
   }
 }

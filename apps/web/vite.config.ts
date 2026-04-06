@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
   const apiTarget = env.VITE_DEV_API_PROXY ?? "http://127.0.0.1:3000";
 
   return {
+    envDir: path.resolve(__dirname, "../.."),
     plugins: [react()],
     resolve: {
       alias: { "@": path.resolve(__dirname, "src") },

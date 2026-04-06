@@ -16,9 +16,11 @@ export async function registerJwtAuth(app: FastifyInstance) {
     app.log.warn("JWT_SECRET not set — using dev default (do not use in production)");
   }
 
+  const accessTtl = process.env.JWT_ACCESS_EXPIRES_IN ?? process.env.JWT_EXPIRES_IN ?? "15m";
+
   await app.register(jwt, {
     secret,
-    sign: { expiresIn: process.env.JWT_EXPIRES_IN ?? "7d" },
+    sign: { expiresIn: accessTtl },
   });
 
   app.decorate(
@@ -26,8 +28,15 @@ export async function registerJwtAuth(app: FastifyInstance) {
     async function authenticate(request: FastifyRequest, reply: FastifyReply) {
       try {
         await request.jwtVerify();
+        const u = request.user as { sub?: string; typ?: string };
+        if (u?.typ === "refresh") {
+          return reply.status(401).send({
+            error: "unauthorized",
+            message: "Dùng access token cho API này, không dùng refresh token.",
+          });
+        }
       } catch {
-        reply.status(401).send({ error: "unauthorized", message: "Token không hợp lệ hoặc hết hạn." });
+        return reply.status(401).send({ error: "unauthorized", message: "Token không hợp lệ hoặc hết hạn." });
       }
     }
   );

@@ -7,11 +7,11 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (!ready) {
     return (
-      <div className="flex min-h-[40vh] items-center justify-center text-slate-500 text-sm">Đang tải…</div>
+      <div className="flex min-h-[40vh] items-center justify-center text-zinc-500 text-sm">Đang tải…</div>
     );
   }
   if (!token) {
-    return <Navigate to="/login" replace state={{ from: loc.pathname }} />;
+    return <Navigate to="/auth?tab=login" replace state={{ from: loc.pathname }} />;
   }
   return <>{children}</>;
 }

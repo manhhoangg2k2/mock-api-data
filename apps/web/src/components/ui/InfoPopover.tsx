@@ -2,17 +2,11 @@ import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { IconHelpCircle } from "./icons";
 
 type Props = {
-  /** Nội dung popover (đoạn hướng dẫn) */
   children: ReactNode;
-  /** aria-label cho nút */
   label?: string;
-  /** Kích thước panel */
   panelClassName?: string;
 };
 
-/**
- * Nút ? / i — click để mở popover; click ngoài hoặc Escape để đóng.
- */
 export function InfoPopover({ children, label = "Thông tin thêm", panelClassName = "w-72" }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -45,7 +39,7 @@ export function InfoPopover({ children, label = "Thông tin thêm", panelClassNa
           e.stopPropagation();
           setOpen((v) => !v);
         }}
-        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-white/5 hover:text-slate-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-accent/60"
+        className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-zinc-500 transition hover:bg-zinc-800/50 hover:text-zinc-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/60"
         aria-label={label}
         aria-expanded={open}
         aria-controls={open ? panelId : undefined}
@@ -57,7 +51,7 @@ export function InfoPopover({ children, label = "Thông tin thêm", panelClassNa
           id={panelId}
           role="region"
           aria-labelledby={btnId}
-          className={`absolute left-0 top-full z-50 mt-1.5 ${panelClassName} rounded-xl border border-surface-border bg-surface-raised p-3 text-left text-xs leading-relaxed text-slate-300 shadow-xl`}
+          className={`absolute left-0 top-full z-50 mt-1.5 ${panelClassName} rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-left text-xs leading-relaxed text-zinc-300 shadow-xl`}
         >
           {children}
         </div>

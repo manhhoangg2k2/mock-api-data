@@ -2,6 +2,7 @@ import { parseSchemaConfig, type SchemaConfig } from "../deps/shared.js";
 import { buildObject, type ChaosMeta } from "./chaos-field.js";
 import { getFakerForLocale } from "./faker-instance.js";
 import { withPreviewStressChaos } from "./preview-stress-chaos.js";
+import { rewriteChaosPathsForResponseTemplate } from "./chaos-path-prefix.js";
 import {
   applyResponseTemplate,
   TemplateValidationError,
@@ -10,7 +11,8 @@ import {
 
 function parseLimitPage(
   query: Record<string, string | string[] | undefined>,
-  defaultLimit: number
+  defaultLimit: number,
+  opts?: { totalCount: number; defaultPage?: number }
 ) {
   const limitRaw = query.limit ?? query.page_size;
   const pageRaw = query.page;
@@ -21,7 +23,23 @@ function parseLimitPage(
   const limit = Number.isFinite(parsedLimit)
     ? Math.min(100, Math.max(1, parsedLimit))
     : Math.min(100, Math.max(1, defaultLimit));
-  const page = Math.max(1, Number(Array.isArray(pageRaw) ? pageRaw[0] : pageRaw) || 1);
+
+  const total = Math.max(1, opts?.totalCount ?? 1_000_000);
+  const maxPage = Math.max(1, Math.ceil(total / limit));
+
+  const pageParsed =
+    pageRaw !== undefined && pageRaw !== ""
+      ? Number(Array.isArray(pageRaw) ? pageRaw[0] : pageRaw)
+      : NaN;
+
+  let page: number;
+  if (Number.isFinite(pageParsed) && pageParsed >= 1) {
+    page = Math.floor(pageParsed);
+  } else {
+    const d = opts?.defaultPage ?? 1;
+    page = Math.max(1, Math.floor(Number(d)) || 1);
+  }
+  page = Math.min(Math.max(1, page), maxPage);
   return { limit, page };
 }
 
@@ -51,19 +69,23 @@ export function generateFromConfig(
 
   if (config.virtualPagination?.enabled) {
     const defaultLimit = config.virtualPagination.pageSizeDefault ?? 20;
-    const { limit, page } = parseLimitPage(query, defaultLimit);
     const total = config.virtualPagination.totalCount ?? 1_000_000;
+    const { limit, page } = parseLimitPage(query, defaultLimit, {
+      totalCount: total,
+      defaultPage: config.virtualPagination.defaultPage,
+    });
     const items: Record<string, unknown>[] = [];
     for (let i = 0; i < limit; i++) {
       const row: Record<string, unknown> = { _index: (page - 1) * limit + i };
-      buildObject(baseFields, row, chaos, faker, `items[${i}]`);
+      buildObject(baseFields, row, chaos, faker, `data[${i}]`);
       items.push(row);
     }
     const core = {
       data: items,
       meta: { page, limit, total },
     };
-    return { chaos, body: applyResponseTemplate(config, core) };
+    const body = applyResponseTemplate(config, core);
+    return { chaos: rewriteChaosPathsForResponseTemplate(chaos, config), body };
   }
 
   if (config.responseShape === "array") {
@@ -74,10 +96,12 @@ export function generateFromConfig(
       buildObject(baseFields, row, chaos, faker, `[${i}]`);
       items.push(row);
     }
-    return { chaos, body: applyResponseTemplate(config, items) };
+    const body = applyResponseTemplate(config, items);
+    return { chaos: rewriteChaosPathsForResponseTemplate(chaos, config), body };
   }
 
   const obj: Record<string, unknown> = {};
   buildObject(baseFields, obj, chaos, faker);
-  return { chaos, body: applyResponseTemplate(config, obj) };
+  const body = applyResponseTemplate(config, obj);
+  return { chaos: rewriteChaosPathsForResponseTemplate(chaos, config), body };
 }

@@ -38,6 +38,8 @@ export const virtualPaginationSchema = z.object({
   totalCount: z.number().int().positive().optional(),
   /** Dùng khi client không gửi ?limit= — tối đa 100 */
   pageSizeDefault: z.number().int().min(1).max(100).optional(),
+  /** Trang mặc định (1-based) khi client không gửi ?page= — server sẽ kẹp theo total/limit */
+  defaultPage: z.number().int().min(1).optional(),
 });
 
 export const responseTemplateIdSchema = z.enum([

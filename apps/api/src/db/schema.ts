@@ -11,6 +11,8 @@ import {
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   username: text("username").notNull().unique(),
+  /** Segment trong URL mock: GET /api/<publicSlug>/... — null = fallback username (dữ liệu cũ). */
+  publicSlug: text("public_slug").unique(),
   email: text("email").unique(),
   passwordHash: text("password_hash"),
   webhookToken: text("webhook_token").notNull().unique(),
@@ -50,6 +52,32 @@ export const endpoints = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (t) => [uniqueIndex("endpoints_user_path").on(t.userId, t.pathNormalized)]
+);
+
+// Guest (anonymous) mock endpoints
+export const guestEndpoints = pgTable(
+  "guest_endpoints",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+
+    // Guest actor key (MVP: dùng request IP để rate limit)
+    actorKey: text("actor_key").notNull(),
+
+    guestToken: text("guest_token").notNull().unique(),
+    pathNormalized: text("path_normalized").notNull(),
+    methodsAllowed: jsonb("methods_allowed").$type<string[]>().notNull(),
+    schemaConfig: jsonb("schema_config").notNull(),
+
+    latencyMsMin: integer("latency_ms_min"),
+    latencyMsMax: integer("latency_ms_max"),
+    statusRoulette: jsonb("status_roulette").$type<Record<string, number>>(),
+
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex("guest_endpoints_token_path").on(t.guestToken, t.pathNormalized),
+  ]
 );
 
 export const webhookLogs = pgTable("webhook_logs", {
