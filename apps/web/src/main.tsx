@@ -13,6 +13,18 @@ import "@fontsource/jetbrains-mono/600.css";
 import App from "./App";
 import "./index.css";
 
+try {
+  const redirectPath = window.sessionStorage.getItem("spa_redirect_path");
+  if (redirectPath) {
+    window.sessionStorage.removeItem("spa_redirect_path");
+    if (redirectPath.startsWith("/")) {
+      window.history.replaceState({}, "", redirectPath);
+    }
+  }
+} catch {
+  /* ignore */
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>

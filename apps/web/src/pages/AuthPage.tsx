@@ -190,14 +190,23 @@ export function AuthPage() {
     setErr(null);
     setSendingCode(true);
     try {
-      await apiFetch("/v1/auth/register/send-code", {
-        method: "POST",
-        json: { email: em },
-      });
+      await Promise.race([
+        apiFetch("/v1/auth/register/send-code", {
+          method: "POST",
+          json: { email: em },
+        }),
+        new Promise<never>((_, reject) =>
+          window.setTimeout(() => reject(new Error("timeout_send_code")), 15000)
+        ),
+      ]);
       setCodeSent(true);
       toast.success("Đã gửi mã xác thực về email.");
     } catch (e) {
-      if (e instanceof ApiError) {
+      if (e instanceof Error && e.message === "timeout_send_code") {
+        const m = "Gửi mã đang quá thời gian chờ. Vui lòng thử lại.";
+        setErr(m);
+        toast.error(m);
+      } else if (e instanceof ApiError) {
         const b = e.body as { message?: string };
         const m = b?.message ?? e.message;
         setErr(m);

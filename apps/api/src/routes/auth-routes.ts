@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto";
+import { lookup } from "node:dns";
 import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import type { FastifyInstance, FastifyReply } from "fastify";
 import bcrypt from "bcrypt";
@@ -61,8 +62,49 @@ const mailer =
         port: smtpPort,
         secure: smtpSecure,
         auth: { user: smtpUser, pass: smtpPass },
+        connectionTimeout: 8000,
+        greetingTimeout: 8000,
+        socketTimeout: 12000,
       })
     : null;
+
+function lookupIPv4(hostname: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    lookup(hostname, { family: 4, all: false }, (err, address) => {
+      if (err || !address) reject(err ?? new Error("ipv4_not_found"));
+      else resolve(address);
+    });
+  });
+}
+
+async function sendMailWithTimeout(
+  payload: Parameters<NonNullable<typeof mailer>["sendMail"]>[0],
+  timeoutMs = 12000
+) {
+  if (!mailer) throw new Error("mailer_not_configured");
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    setTimeout(() => reject(new Error("smtp_timeout")), timeoutMs);
+  });
+  try {
+    return await Promise.race([mailer.sendMail(payload), timeoutPromise]);
+  } catch (e) {
+    const err = e as NodeJS.ErrnoException;
+    if (err?.code !== "ENETUNREACH" || !smtpHost || !smtpUser || !smtpPass) throw e;
+
+    const ipv4 = await lookupIPv4(smtpHost);
+    const retryMailer = nodemailer.createTransport({
+      host: ipv4,
+      port: smtpPort,
+      secure: smtpSecure,
+      auth: { user: smtpUser, pass: smtpPass },
+      tls: { servername: smtpHost },
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 12000,
+    });
+    return Promise.race([retryMailer.sendMail(payload), timeoutPromise]);
+  }
+}
 
 function isUniqueViolation(e: unknown): boolean {
   return typeof e === "object" && e !== null && "code" in e && (e as { code: string }).code === "23505";
@@ -156,13 +198,21 @@ export async function registerAuthRoutes(app: FastifyInstance) {
       expiresAt,
     });
 
-    await mailer.sendMail({
-      from: mailFrom,
-      to: emailNorm,
-      subject: "[PaperMock] Ma xac thuc dang ky",
-      text: `Ma xac thuc cua ban la: ${code}\nMa co hieu luc trong 10 phut.`,
-      html: `<p>Ma xac thuc cua ban la: <b style="font-size:20px;letter-spacing:2px">${code}</b></p><p>Ma co hieu luc trong 10 phut.</p>`,
-    });
+    try {
+      await sendMailWithTimeout({
+        from: mailFrom,
+        to: emailNorm,
+        subject: "[PaperMock] Ma xac thuc dang ky",
+        text: `Ma xac thuc cua ban la: ${code}\nMa co hieu luc trong 10 phut.`,
+        html: `<p>Ma xac thuc cua ban la: <b style="font-size:20px;letter-spacing:2px">${code}</b></p><p>Ma co hieu luc trong 10 phut.</p>`,
+      });
+    } catch (e) {
+      request.log.error({ err: e, email: emailNorm }, "otp_send_failed");
+      return reply.status(504).send({
+        error: "otp_send_timeout",
+        message: "Hệ thống gửi email đang chậm. Vui lòng thử lại sau vài giây.",
+      });
+    }
 
     return reply.send({
       ok: true,
