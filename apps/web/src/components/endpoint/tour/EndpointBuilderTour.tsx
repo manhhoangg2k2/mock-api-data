@@ -248,20 +248,20 @@ export function EndpointBuilderTour({ open, onClose, onStepChange }: Props) {
         className="tour-card-animate fixed z-[210] w-[min(380px,calc(100vw-32px))] rounded-2xl border border-zinc-700 bg-zinc-900 p-5 shadow-2xl shadow-black/60 ring-1 ring-violet-500/20"
         style={{ top: cardPos.top, left: cardPos.left }}
       >
-        <p className="text-[10px] font-medium uppercase tracking-wider text-violet-400/90">
+        <p className="text-base font-medium uppercase tracking-wider text-violet-400/90">
           Bước {step + 1} / {STEPS.length}
         </p>
         <h2 id="tour-title" className="mt-1 text-lg font-semibold tracking-tight text-zinc-50">
           {s.title}
         </h2>
-        <p className="mt-3 max-h-[min(40vh,280px)] overflow-y-auto text-sm leading-relaxed text-zinc-400">
+        <p className="mt-3 max-h-[min(40vh,280px)] overflow-y-auto text-base leading-relaxed text-zinc-400">
           {s.body}
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-between gap-2 border-t border-zinc-800 pt-4">
           <button
             type="button"
             onClick={skip}
-            className="text-xs text-zinc-500 transition-colors hover:text-zinc-300"
+            className="text-base text-zinc-500 transition-colors hover:text-zinc-300"
           >
             Bỏ qua
           </button>
@@ -270,7 +270,7 @@ export function EndpointBuilderTour({ open, onClose, onStepChange }: Props) {
               <button
                 type="button"
                 onClick={() => setStep((i) => i - 1)}
-                className="rounded-lg border border-zinc-600 bg-zinc-950 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:border-zinc-500 hover:bg-zinc-800"
+                className="rounded-lg border border-zinc-600 bg-zinc-950 px-3 py-1.5 text-base font-medium text-zinc-300 hover:border-zinc-500 hover:bg-zinc-800"
               >
                 Trước
               </button>
@@ -279,7 +279,7 @@ export function EndpointBuilderTour({ open, onClose, onStepChange }: Props) {
               <button
                 type="button"
                 onClick={() => setStep((i) => i + 1)}
-                className="rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-medium text-white shadow-md shadow-violet-900/40 transition-colors hover:bg-violet-500"
+                className="rounded-lg bg-violet-600 px-3 py-1.5 text-base font-medium text-white shadow-md shadow-violet-900/40 transition-colors hover:bg-violet-500"
               >
                 Tiếp tục
               </button>
@@ -287,7 +287,7 @@ export function EndpointBuilderTour({ open, onClose, onStepChange }: Props) {
               <button
                 type="button"
                 onClick={finish}
-                className="rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-medium text-white shadow-md shadow-violet-900/40 transition-colors hover:bg-violet-500"
+                className="rounded-lg bg-violet-600 px-3 py-1.5 text-base font-medium text-white shadow-md shadow-violet-900/40 transition-colors hover:bg-violet-500"
               >
                 Bắt đầu
               </button>

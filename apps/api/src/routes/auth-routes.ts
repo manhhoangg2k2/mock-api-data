@@ -1,11 +1,12 @@
 import { randomBytes } from "node:crypto";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gt, isNull } from "drizzle-orm";
 import type { FastifyInstance, FastifyReply } from "fastify";
 import bcrypt from "bcrypt";
 import { OAuth2Client } from "google-auth-library";
+import nodemailer from "nodemailer";
 import { z } from "zod";
 import { db } from "../db/client.js";
-import { users } from "../db/schema.js";
+import { emailVerificationCodes, users } from "../db/schema.js";
 import { assertValidSlug } from "../util/slug.js";
 
 const ACCESS_JWT_EXPIRES = process.env.JWT_ACCESS_EXPIRES_IN ?? process.env.JWT_EXPIRES_IN ?? "15m";
@@ -26,6 +27,7 @@ const registerBody = z.object({
   publicSlug: z.string().min(3).max(32),
   email: z.string().email(),
   password: z.string().min(8).max(128),
+  verificationCode: z.string().min(4).max(8),
 });
 
 const loginBody = z.object({
@@ -33,9 +35,34 @@ const loginBody = z.object({
   password: z.string().min(1).max(128),
 });
 
+const sendRegisterCodeBody = z.object({
+  email: z.string().email(),
+});
+
 function webhookToken(): string {
   return randomBytes(24).toString("hex");
 }
+
+function sixDigitCode(): string {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+const smtpHost = process.env.SMTP_HOST?.trim();
+const smtpPort = Number(process.env.SMTP_PORT ?? "587");
+const smtpUser = process.env.SMTP_USER?.trim();
+const smtpPass = process.env.SMTP_PASS?.trim();
+const smtpSecure = String(process.env.SMTP_SECURE ?? "false").toLowerCase() === "true";
+const mailFrom = process.env.MAIL_FROM?.trim() || smtpUser || "no-reply@papermock.local";
+
+const mailer =
+  smtpHost && smtpPort && smtpUser && smtpPass
+    ? nodemailer.createTransport({
+        host: smtpHost,
+        port: smtpPort,
+        secure: smtpSecure,
+        auth: { user: smtpUser, pass: smtpPass },
+      })
+    : null;
 
 function isUniqueViolation(e: unknown): boolean {
   return typeof e === "object" && e !== null && "code" in e && (e as { code: string }).code === "23505";
@@ -82,12 +109,74 @@ async function allocateUsernameAndSlugForGoogle(emailNorm: string, attempt: numb
 }
 
 export async function registerAuthRoutes(app: FastifyInstance) {
+  app.post("/v1/auth/register/send-code", async (request, reply) => {
+    const parsed = sendRegisterCodeBody.safeParse(request.body);
+    if (!parsed.success) {
+      return reply.status(422).send({ error: "validation_error", details: parsed.error.flatten() });
+    }
+    const emailNorm = parsed.data.email.trim().toLowerCase();
+
+    const existingUser = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, emailNorm))
+      .limit(1);
+    if (existingUser[0]) {
+      return reply.status(409).send({ error: "email_exists", message: "Email này đã có tài khoản." });
+    }
+
+    if (!mailer) {
+      return reply.status(503).send({
+        error: "email_not_configured",
+        message: "Chưa cấu hình SMTP để gửi mã. Thiết lập SMTP_HOST/SMTP_PORT/SMTP_USER/SMTP_PASS/MAIL_FROM.",
+      });
+    }
+
+    const [last] = await db
+      .select({ createdAt: emailVerificationCodes.createdAt })
+      .from(emailVerificationCodes)
+      .where(eq(emailVerificationCodes.email, emailNorm))
+      .orderBy(desc(emailVerificationCodes.createdAt))
+      .limit(1);
+
+    if (last?.createdAt && Date.now() - new Date(last.createdAt).getTime() < 60_000) {
+      return reply.status(429).send({
+        error: "too_many_requests",
+        message: "Vui lòng chờ 60 giây trước khi gửi lại mã.",
+      });
+    }
+
+    const code = sixDigitCode();
+    const codeHash = await bcrypt.hash(code, 8);
+    const expiresAt = new Date(Date.now() + 10 * 60_000);
+
+    await db.insert(emailVerificationCodes).values({
+      email: emailNorm,
+      codeHash,
+      expiresAt,
+    });
+
+    await mailer.sendMail({
+      from: mailFrom,
+      to: emailNorm,
+      subject: "[PaperMock] Ma xac thuc dang ky",
+      text: `Ma xac thuc cua ban la: ${code}\nMa co hieu luc trong 10 phut.`,
+      html: `<p>Ma xac thuc cua ban la: <b style="font-size:20px;letter-spacing:2px">${code}</b></p><p>Ma co hieu luc trong 10 phut.</p>`,
+    });
+
+    return reply.send({
+      ok: true,
+      expiresInSec: 600,
+      message: "Da gui ma xac thuc ve email.",
+    });
+  });
+
   app.post("/v1/auth/register", async (request, reply) => {
     const parsed = registerBody.safeParse(request.body);
     if (!parsed.success) {
       return reply.status(422).send({ error: "validation_error", details: parsed.error.flatten() });
     }
-    const { username, publicSlug, email, password } = parsed.data;
+    const { username, publicSlug, email, password, verificationCode } = parsed.data;
     try {
       assertValidSlug("username", username);
       assertValidSlug("publicSlug", publicSlug);
@@ -98,6 +187,31 @@ export async function registerAuthRoutes(app: FastifyInstance) {
 
     const emailNorm = email.trim().toLowerCase();
     const passwordHash = await bcrypt.hash(password, 10);
+
+    const [codeRow] = await db
+      .select()
+      .from(emailVerificationCodes)
+      .where(
+        and(
+          eq(emailVerificationCodes.email, emailNorm),
+          isNull(emailVerificationCodes.consumedAt),
+          gt(emailVerificationCodes.expiresAt, new Date())
+        )
+      )
+      .orderBy(desc(emailVerificationCodes.createdAt))
+      .limit(1);
+
+    if (!codeRow) {
+      return reply.status(400).send({
+        error: "verification_required",
+        message: "Bạn cần gửi mã xác thực email trước khi đăng ký.",
+      });
+    }
+
+    const codeOk = await bcrypt.compare(verificationCode.trim(), codeRow.codeHash);
+    if (!codeOk) {
+      return reply.status(400).send({ error: "invalid_verification_code", message: "Mã xác thực không đúng." });
+    }
 
     try {
       const [row] = await db
@@ -115,6 +229,11 @@ export async function registerAuthRoutes(app: FastifyInstance) {
           email: users.email,
           publicSlug: users.publicSlug,
         });
+
+      await db
+        .update(emailVerificationCodes)
+        .set({ consumedAt: new Date() })
+        .where(eq(emailVerificationCodes.id, codeRow.id));
 
       const { token, refreshToken } = await issueAuthTokens(reply, row.id, row.username);
       return reply.status(201).send({

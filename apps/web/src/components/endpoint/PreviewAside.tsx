@@ -44,14 +44,14 @@ export function PreviewAside({
     >
       <div className="flex shrink-0 items-start justify-between gap-2 border-b border-zinc-800 px-3 py-2">
         <div className="min-w-0">
-          <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">Live preview</h2>
-          <p className="text-[10px] text-zinc-500">POST /v1/preview</p>
+          <h2 className="text-base font-semibold uppercase tracking-wide text-zinc-400">Live preview</h2>
+          <p className="text-base text-zinc-500">POST /v1/preview</p>
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <button
             type="button"
             onClick={() => onMultiRoll(5)}
-            className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-1 text-[10px] text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
+            className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-1 text-base text-zinc-500 hover:border-zinc-700 hover:text-zinc-300"
             title="5 lần"
           >
             ×5
@@ -59,7 +59,7 @@ export function PreviewAside({
           <button
             type="button"
             onClick={() => onReroll()}
-            className="inline-flex items-center gap-1 rounded border border-zinc-800 bg-zinc-900 px-2 py-1 text-[10px] font-medium text-zinc-300 hover:border-violet-500/50 hover:text-violet-300"
+            className="inline-flex items-center gap-1 rounded border border-zinc-800 bg-zinc-900 px-2 py-1 text-base font-medium text-zinc-300 hover:border-violet-500/50 hover:text-violet-300"
             title="Reroll"
           >
             <RefreshCw size={12} className={previewLoading ? "animate-spin" : ""} aria-hidden />
@@ -70,7 +70,7 @@ export function PreviewAside({
 
       <div className="shrink-0 space-y-2 border-b border-zinc-800 px-3 py-2">
         {paginationEnabled ? (
-          <label className="flex flex-wrap items-center gap-2 text-[10px] text-zinc-500">
+          <label className="flex flex-wrap items-center gap-2 text-base text-zinc-500">
             <span className="shrink-0">Limit</span>
             <StepperInput
               min={1}
@@ -81,12 +81,12 @@ export function PreviewAside({
               className="w-[7rem]"
             />
             <InfoPopover label="Limit" panelClassName="w-56">
-              <p className="text-xs text-zinc-400">Giống ?limit trên mock paginated.</p>
+              <p className="text-base text-zinc-400">Giống ?limit trên mock paginated.</p>
             </InfoPopover>
           </label>
         ) : null}
         {!paginationEnabled && responseShape === "array" ? (
-          <p className="text-[10px] text-zinc-500">
+          <p className="text-base text-zinc-500">
             <span className="tabular-nums text-zinc-400">{arrayItemCount}</span> phần tử / lần sinh
           </p>
         ) : null}
@@ -97,14 +97,14 @@ export function PreviewAside({
         <div className="min-h-0 flex-1 space-y-1 overflow-y-auto p-2">
           {previewRolls.map((roll, i) => (
             <details key={i} className="rounded border border-zinc-800 bg-zinc-900/40" open={i === 0}>
-              <summary className="cursor-pointer px-2 py-1 text-[10px] text-zinc-500">
+              <summary className="cursor-pointer px-2 py-1 text-base text-zinc-500">
                 #{i + 1}
                 {roll.chaos?.length ? (
                   <span className="ml-1 text-amber-200/75">· {roll.chaos.length} ô lệch</span>
                 ) : null}
               </summary>
               <div className="border-t border-zinc-800 p-2">
-                <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-all font-mono text-[10px] leading-relaxed text-zinc-300">
+                <pre className="max-h-56 overflow-auto whitespace-pre-wrap break-all font-mono text-base leading-relaxed text-zinc-300">
                   {JSON.stringify(roll.body, null, 2)}
                 </pre>
               </div>

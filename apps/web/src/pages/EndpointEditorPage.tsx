@@ -422,7 +422,7 @@ export function EndpointEditorPage() {
 
   if (!projectId) {
     return (
-      <p className="text-sm text-zinc-500">
+      <p className="text-base text-zinc-500">
         Thiếu project. <Link to="/projects" className="text-violet-400 hover:underline">Về danh sách</Link>
       </p>
     );
@@ -431,7 +431,7 @@ export function EndpointEditorPage() {
   if (loadingEndpoint) {
     return (
       <div className="space-y-4">
-        <Link to={`/projects/${projectId}`} className="text-sm text-violet-400/90 hover:underline">
+        <Link to={`/projects/${projectId}`} className="text-base text-violet-400/90 hover:underline">
           ← Quay lại project
         </Link>
         <AppLoadingScreen layout="compact" message="Đang tải endpoint…" />
@@ -442,7 +442,7 @@ export function EndpointEditorPage() {
   if (loadErr) {
     return (
       <div className="space-y-4">
-        <Link to={`/projects/${projectId}`} className="text-sm text-violet-400/90 hover:underline">
+        <Link to={`/projects/${projectId}`} className="text-base text-violet-400/90 hover:underline">
           ← Quay lại project
         </Link>
         <FieldError message={loadErr} />
@@ -503,7 +503,7 @@ export function EndpointEditorPage() {
 
   return (
     <div className="space-y-4">
-      <div className="text-[11px] text-zinc-500">
+      <div className="text-base text-zinc-500">
         <Link to={`/projects/${projectId}`} className="text-violet-400/90 hover:underline">
           ← Project
         </Link>
@@ -516,11 +516,11 @@ export function EndpointEditorPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5 lg:items-stretch lg:gap-6">
         <div className="flex min-w-0 flex-col rounded-md border border-zinc-800 bg-zinc-950 lg:col-span-3">
           <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 bg-zinc-950/95 px-3 py-2.5 backdrop-blur-md">
-            <h2 className="text-sm font-semibold tracking-tight text-zinc-100">Cấu hình Endpoint</h2>
+            <h2 className="text-base font-semibold tracking-tight text-zinc-100">Cấu hình Endpoint</h2>
             <div className="flex shrink-0 items-center gap-2">
               <Link
                 to={`/projects/${projectId}`}
-                className="rounded border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                className="rounded border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-base font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
               >
                 Hủy
               </Link>
@@ -528,7 +528,7 @@ export function EndpointEditorPage() {
                 type="submit"
                 form={EDITOR_FORM_ID}
                 disabled={saving}
-                className="rounded bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-violet-900/30 hover:bg-violet-500 disabled:opacity-50"
+                className="rounded bg-violet-600 px-3 py-1.5 text-base font-semibold text-white shadow-sm shadow-violet-900/30 hover:bg-violet-500 disabled:opacity-50"
               >
                 {saving ? "Đang lưu…" : "Lưu endpoint"}
               </button>
@@ -538,7 +538,7 @@ export function EndpointEditorPage() {
           <div className="p-3">
             <form id={EDITOR_FORM_ID} onSubmit={onSave}>
               <details className="mb-4 rounded-md border border-zinc-800 bg-zinc-900/30">
-                <summary className="cursor-pointer px-2 py-1.5 text-[10px] text-zinc-500 [&::-webkit-details-marker]:hidden">
+                <summary className="cursor-pointer px-2 py-1.5 text-base text-zinc-500 [&::-webkit-details-marker]:hidden">
                   AI gợi ý schema (mock)
                 </summary>
                 <div className="border-t border-zinc-800 p-2">
@@ -546,12 +546,12 @@ export function EndpointEditorPage() {
                     value={aiDraft}
                     onChange={(e) => setAiDraft(e.target.value)}
                     rows={2}
-                    className="w-full rounded border border-zinc-800 bg-zinc-800 px-2 py-1 text-xs text-zinc-200 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/30"
+                    className="w-full rounded border border-zinc-800 bg-zinc-800 px-2 py-1 text-base text-zinc-200 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/30"
                   />
                   <button
                     type="button"
                     onClick={() => toast.info("Chưa kết nối model — UI mock.")}
-                    className="mt-1 text-[10px] text-violet-400 hover:underline"
+                    className="mt-1 text-base text-violet-400 hover:underline"
                   >
                     Gợi ý
                   </button>

@@ -1,6 +1,6 @@
 import { TOUR_STORAGE_KEY } from "@/components/endpoint/constants";
 
-export const TOUR_PENDING_AFTER_AUTH_KEY = "devmock_should_auto_endpoint_tour";
+export const TOUR_PENDING_AFTER_AUTH_KEY = "PaperMock_should_auto_endpoint_tour";
 
 export function markEndpointTourPendingAfterAuth(): void {
   try {

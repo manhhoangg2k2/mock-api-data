@@ -16,7 +16,7 @@ export function EndpointMethodBadges({ methods }: { methods: string[] }) {
       {upper.map((m) => (
         <span
           key={m}
-          className={`inline-flex rounded-md border px-2 py-0.5 font-mono text-[0.65rem] font-semibold uppercase tracking-wide ${METHOD_STYLES[m] ?? DEFAULT_STYLE}`}
+          className={`inline-flex rounded-md border px-2 py-0.5 font-mono text-base font-semibold uppercase tracking-wide ${METHOD_STYLES[m] ?? DEFAULT_STYLE}`}
         >
           {m}
         </span>

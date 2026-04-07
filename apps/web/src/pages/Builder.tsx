@@ -64,14 +64,14 @@ export function Builder() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-white">Preview schema</h1>
-        <p className="mt-2 text-slate-400 max-w-2xl text-sm">
+        <p className="mt-2 text-slate-400 max-w-2xl text-base">
           Gọi <code className="font-mono text-accent">POST /v1/preview</code> — sinh JSON mẫu (và meta lỗi nếu có; chưa lưu DB).
         </p>
       </div>
       <div className="grid gap-4 lg:grid-cols-2">
         <div className="space-y-3 rounded-xl border border-surface-border bg-surface-raised p-4">
           <label className="block space-y-1">
-            <span className="text-xs text-slate-400">schemaConfig (JSON)</span>
+            <span className="text-base text-slate-400">schemaConfig (JSON)</span>
             <textarea
               rows={16}
               value={schemaJson}
@@ -81,12 +81,12 @@ export function Builder() {
               }}
               aria-invalid={Boolean(schemaErr)}
               aria-describedby={schemaErr ? "builder-schema-err" : undefined}
-              className="w-full rounded-lg border border-surface-border bg-surface p-3 font-mono text-xs text-slate-200 outline-none focus:border-accent"
+              className="w-full rounded-lg border border-surface-border bg-surface p-3 font-mono text-base text-slate-200 outline-none focus:border-accent"
             />
             <FieldError id="builder-schema-err" message={schemaErr} size="compact" />
           </label>
           <label className="block space-y-1">
-            <span className="text-xs text-slate-400">Query (preview pagination)</span>
+            <span className="text-base text-slate-400">Query (preview pagination)</span>
             <input
               value={queryStr}
               onChange={(e) => {
@@ -95,7 +95,7 @@ export function Builder() {
               }}
               aria-invalid={Boolean(requestErr)}
               aria-describedby={requestErr ? "builder-query-err" : undefined}
-              className="w-full rounded-lg border border-surface-border bg-surface px-3 py-2 font-mono text-xs text-white outline-none focus:border-accent"
+              className="w-full rounded-lg border border-surface-border bg-surface px-3 py-2 font-mono text-base text-white outline-none focus:border-accent"
             />
             <FieldError id="builder-query-err" message={requestErr} size="compact" />
           </label>
@@ -103,19 +103,19 @@ export function Builder() {
             type="button"
             disabled={loading}
             onClick={reroll}
-            className="rounded-lg bg-accent px-4 py-2 text-sm font-medium text-white hover:bg-violet-400 disabled:opacity-50"
+            className="rounded-lg bg-accent px-4 py-2 text-base font-medium text-white hover:bg-violet-400 disabled:opacity-50"
           >
             {loading ? "…" : "🔄 Reroll preview"}
           </button>
         </div>
         <div className="rounded-xl border border-surface-border bg-surface-raised overflow-hidden flex flex-col min-h-[320px]">
-          <div className="border-b border-surface-border px-4 py-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+          <div className="border-b border-surface-border px-4 py-2 text-base font-medium uppercase tracking-wide text-slate-500">
             Kết quả
           </div>
           {requestErr || schemaErr ? (
-            <pre className="p-4 font-mono text-xs text-red-400 overflow-auto flex-1">{requestErr ?? schemaErr}</pre>
+            <pre className="p-4 font-mono text-base text-red-400 overflow-auto flex-1">{requestErr ?? schemaErr}</pre>
           ) : (
-            <pre className="p-4 font-mono text-xs text-slate-300 overflow-auto flex-1 whitespace-pre-wrap">
+            <pre className="p-4 font-mono text-base text-slate-300 overflow-auto flex-1 whitespace-pre-wrap">
               {out || "Bấm Reroll để xem JSON."}
             </pre>
           )}

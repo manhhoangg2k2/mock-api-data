@@ -56,12 +56,12 @@ export function StatusRouletteFields({
     <div className={comfortable ? "rounded-xl border border-zinc-800/50 bg-zinc-900/40 p-4" : "rounded-md border border-zinc-800 bg-zinc-950/50 p-2"}>
       <div className="flex items-center gap-3">
         <RouletteToggle enabled={enabled} onToggle={() => setEnabled(!enabled)} />
-        <span className={`flex items-center gap-2 ${comfortable ? "text-sm text-zinc-300" : "text-xs text-zinc-400"}`}>
+        <span className={`flex items-center gap-2 ${comfortable ? "text-base text-zinc-300" : "text-base text-zinc-400"}`}>
           <IconDice size={comfortable ? 16 : 14} className="text-zinc-500" aria-hidden />
           Status roulette
         </span>
       </div>
-      <p className={`mt-2 ${comfortable ? "text-xs text-zinc-500" : "text-[10px] text-zinc-500"}`}>
+      <p className={`mt-2 ${comfortable ? "text-base text-zinc-500" : "text-base text-zinc-500"}`}>
         Bật để mỗi lần gọi mock có thể trả mã HTTP khác nhau theo tỷ lệ. Trọng số là tương đối giữa các dòng (không cần tổng 100%).
       </p>
 
@@ -72,7 +72,7 @@ export function StatusRouletteFields({
               <button
                 type="button"
                 onClick={() => setRows([newRouletteRow(200, 100)])}
-                className="rounded-lg border border-zinc-800 px-2 py-1 text-xs text-zinc-400 hover:text-white"
+                className="rounded-lg border border-zinc-800 px-2 py-1 text-base text-zinc-400 hover:text-white"
               >
                 Chỉ 200
               </button>
@@ -85,14 +85,14 @@ export function StatusRouletteFields({
                     newRouletteRow(401, 3),
                   ])
                 }
-                className="rounded-lg border border-zinc-800 px-2 py-1 text-xs text-zinc-400 hover:text-white"
+                className="rounded-lg border border-zinc-800 px-2 py-1 text-base text-zinc-400 hover:text-white"
               >
                 Gợi ý 200 / 500 / 401
               </button>
               <button
                 type="button"
                 onClick={() => setRows((r) => [...r, newRouletteRow(500, 100)])}
-                className="rounded-lg border border-zinc-700 px-2 py-1 text-xs text-violet-400"
+                className="rounded-lg border border-zinc-700 px-2 py-1 text-base text-violet-400"
               >
                 + Dòng
               </button>
@@ -101,7 +101,7 @@ export function StatusRouletteFields({
             <button
               type="button"
               onClick={() => setRows((r) => [...r, newRouletteRow(500, 100)])}
-              className="text-[10px] font-medium text-violet-400 hover:underline"
+              className="text-base font-medium text-violet-400 hover:underline"
             >
               + Thêm mã HTTP
             </button>
@@ -122,7 +122,7 @@ export function StatusRouletteFields({
                   }
                 >
                   <div className={comfortable ? "space-y-1" : "min-w-0 flex-1"}>
-                    <label className={comfortable ? "block text-xs text-zinc-500" : "sr-only"}>
+                    <label className={comfortable ? "block text-base text-zinc-500" : "sr-only"}>
                       Mã trạng thái HTTP
                     </label>
                     <NativeSelect
@@ -146,8 +146,8 @@ export function StatusRouletteFields({
                       }}
                       className={
                         comfortable
-                          ? "!min-h-10 !text-sm"
-                          : "!min-h-8 !rounded-md !py-1 !text-xs"
+                          ? "!min-h-10 !text-base"
+                          : "!min-h-8 !rounded-md !py-1 !text-base"
                       }
                     >
                       {ROULETTE_HTTP_PRESETS.map((p) => (
@@ -158,7 +158,7 @@ export function StatusRouletteFields({
                       <option value={CUSTOM_SELECT}>Khác (nhập mã 100–599)</option>
                     </NativeSelect>
                     {comfortable && meta ? (
-                      <p className="text-[11px] leading-snug text-zinc-500">{meta.description}</p>
+                      <p className="text-base leading-snug text-zinc-500">{meta.description}</p>
                     ) : null}
                     {selectVal === CUSTOM_SELECT ? (
                       <div className={comfortable ? "mt-1.5" : "mt-1"}>
@@ -187,11 +187,11 @@ export function StatusRouletteFields({
                     }
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className={comfortable ? "text-xs text-zinc-500" : "text-[10px] text-zinc-500"}>
+                      <span className={comfortable ? "text-base text-zinc-500" : "text-base text-zinc-500"}>
                         Trọng số
                       </span>
                       <span
-                        className={`tabular-nums text-zinc-400 ${comfortable ? "text-xs" : "text-[10px]"}`}
+                        className={`tabular-nums text-zinc-400 ${comfortable ? "text-base" : "text-base"}`}
                       >
                         {r.weight}%
                       </span>
@@ -219,8 +219,8 @@ export function StatusRouletteFields({
                     onClick={() => setRows((prev) => prev.filter((x) => x.clientId !== r.clientId))}
                     className={
                       comfortable
-                        ? "text-xs text-rose-400 hover:underline"
-                        : "shrink-0 text-[10px] text-rose-400 hover:underline sm:self-center"
+                        ? "text-base text-rose-400 hover:underline"
+                        : "shrink-0 text-base text-rose-400 hover:underline sm:self-center"
                     }
                   >
                     {comfortable ? "Xóa dòng" : "×"}
@@ -236,8 +236,8 @@ export function StatusRouletteFields({
               onClick={() => setRows([newRouletteRow(200, 100)])}
               className={
                 comfortable
-                  ? "text-xs font-medium text-violet-400 hover:underline"
-                  : "text-[10px] font-medium text-violet-400 hover:underline"
+                  ? "text-base font-medium text-violet-400 hover:underline"
+                  : "text-base font-medium text-violet-400 hover:underline"
               }
             >
               Thêm dòng (mặc định 200 · 100%)

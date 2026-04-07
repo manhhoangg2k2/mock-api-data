@@ -42,7 +42,7 @@ export const mockApiRoutes: FastifyPluginAsync = async (app) => {
 
       const query = request.query as Record<string, string | string[] | undefined>;
       const { body, chaos } = generateFromConfig(endpoint.schemaConfig, query);
-      reply.header("X-DevMock-Chaos", encodeURIComponent(JSON.stringify(chaos)));
+      reply.header("X-PaperMock-Chaos", encodeURIComponent(JSON.stringify(chaos)));
       reply.send(body);
     },
   });

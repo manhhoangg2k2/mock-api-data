@@ -3,7 +3,7 @@ import { AppBar } from "@/components/AppBar";
 
 export function Layout() {
   const { pathname } = useLocation();
-  const fullBleedMain = pathname === "/auth";
+  const fullBleedMain = pathname === "/auth" || pathname === "/login" || pathname === "/register";
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-950 text-zinc-300">

@@ -100,7 +100,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
         />
         <div className="space-y-5 pl-0 sm:pl-[52px]">
           <label className="block max-w-xl space-y-1.5">
-            <span className="text-xs text-zinc-400">Path</span>
+            <span className="text-base text-zinc-400">Path</span>
             <input
               required
               value={p.path}
@@ -108,10 +108,10 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
               onFocus={() => p.setPathInputFocused(true)}
               onBlur={() => p.setPathInputFocused(false)}
               placeholder="v1/items"
-              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-sm text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25"
+              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-base text-zinc-100 outline-none transition placeholder:text-zinc-600 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25"
             />
             {p.pathInputFocused ? (
-              <p className="text-[11px] leading-relaxed text-zinc-500">
+              <p className="text-base leading-relaxed text-zinc-500">
                 Không có dấu <code className="text-zinc-400">/</code> đầu. Khớp với URL public mock.
               </p>
             ) : null}
@@ -122,7 +122,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
               {METHOD_OPTIONS.map((m) => (
                 <label
                   key={m}
-                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-300 transition has-[:checked]:border-violet-500/55 has-[:checked]:bg-violet-500/10 has-[:checked]:text-violet-300"
+                  className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-base text-zinc-300 transition has-[:checked]:border-violet-500/55 has-[:checked]:bg-violet-500/10 has-[:checked]:text-violet-300"
                 >
                   <input
                     type="checkbox"
@@ -177,8 +177,8 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
                 {SHAPE_ICON[preset.id]}
               </span>
               <span className="min-w-0">
-                <span className="block text-sm font-medium text-zinc-100">{preset.title}</span>
-                <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500">
+                <span className="block text-base font-medium text-zinc-100">{preset.title}</span>
+                <span className="mt-0.5 block text-base leading-snug text-zinc-500">
                   {preset.description}
                 </span>
               </span>
@@ -189,7 +189,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
         {p.responsePreset === "array_list" && (
           <div className="mt-5 pl-0 sm:pl-[52px]">
             <label className="block max-w-[200px] space-y-1.5">
-              <span className="flex items-center gap-1 text-xs text-zinc-400">
+              <span className="flex items-center gap-1 text-base text-zinc-400">
                 Số phần tử
                 <InfoPopover label="Số phần tử mảng" panelClassName="w-60">
                   <p className="text-zinc-400">1–100. Mock thật trả đúng số này, không cần query.</p>
@@ -204,7 +204,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
                   p.setArrayItemCount(Math.min(100, Math.max(1, Number(e.target.value) || 1)))
                 }
                 placeholder="5"
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600"
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-base text-zinc-100 placeholder:text-zinc-600"
               />
             </label>
           </div>
@@ -212,7 +212,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
 
         {p.responsePreset === "paginated" && (
           <div className="mt-5 space-y-4 rounded-2xl border border-zinc-800/60 bg-zinc-900/35 p-5 pl-5 sm:ml-[52px]">
-            <p className="flex items-center gap-2 text-xs text-zinc-400">
+            <p className="flex items-center gap-2 text-base text-zinc-400">
               <IconListChecks size={14} />
               Query: <code className="text-zinc-500">?limit=&amp;page=</code>
               <InfoPopover label="Paginated" panelClassName="w-64">
@@ -224,7 +224,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
             </p>
             <div className="grid gap-4 sm:grid-cols-2">
               <label className="space-y-1.5">
-                <span className="text-xs text-zinc-400">Page size mặc định</span>
+                <span className="text-base text-zinc-400">Page size mặc định</span>
                 <input
                   type="number"
                   min={1}
@@ -234,18 +234,18 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
                     p.setPageSizeDefault(Math.min(100, Math.max(1, Number(e.target.value) || 20)))
                   }
                   placeholder="20"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-base text-zinc-100 placeholder:text-zinc-600"
                 />
               </label>
               <label className="space-y-1.5">
-                <span className="text-xs text-zinc-400">totalCount</span>
+                <span className="text-base text-zinc-400">totalCount</span>
                 <input
                   type="number"
                   min={1}
                   value={p.paginationTotal}
                   onChange={(e) => p.setPaginationTotal(Number(e.target.value) || 1)}
                   placeholder="1000000"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-base text-zinc-100 placeholder:text-zinc-600"
                 />
               </label>
             </div>
@@ -254,14 +254,14 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
 
         {p.responsePreset === "custom" && (
           <details className="mt-5 sm:ml-[52px] group rounded-2xl border border-dashed border-zinc-600/60 bg-zinc-900/25 open:bg-zinc-900/35">
-            <summary className="cursor-pointer list-none px-4 py-3 text-xs text-zinc-400 [&::-webkit-details-marker]:hidden">
+            <summary className="cursor-pointer list-none px-4 py-3 text-base text-zinc-400 [&::-webkit-details-marker]:hidden">
               <span className="flex items-center gap-2">
                 <IconSliders size={14} />
                 Tùy chỉnh nâng cao
               </span>
             </summary>
             <div className="space-y-4 border-t border-zinc-800/40 px-4 pb-4 pt-4">
-              <div className="flex flex-wrap gap-4 text-sm">
+              <div className="flex flex-wrap gap-4 text-base">
                 <label className="inline-flex items-center gap-2">
                   <input
                     type="radio"
@@ -283,7 +283,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
                   Array
                 </label>
               </div>
-              <label className="flex items-center gap-2 text-sm text-zinc-300">
+              <label className="flex items-center gap-2 text-base text-zinc-300">
                 <input
                   type="checkbox"
                   checked={p.paginationEnabled}
@@ -295,7 +295,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
               {p.paginationEnabled && (
                 <div className="grid gap-4 sm:grid-cols-2">
                   <label className="space-y-1.5">
-                    <span className="text-xs text-zinc-400">Page size mặc định</span>
+                    <span className="text-base text-zinc-400">Page size mặc định</span>
                     <input
                       type="number"
                       min={1}
@@ -304,24 +304,24 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
                       onChange={(e) =>
                         p.setPageSizeDefault(Math.min(100, Math.max(1, Number(e.target.value) || 20)))
                       }
-                      className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/25"
+                      className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-base text-zinc-100 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/25"
                     />
                   </label>
                   <label className="space-y-1.5">
-                    <span className="text-xs text-zinc-400">totalCount</span>
+                    <span className="text-base text-zinc-400">totalCount</span>
                     <input
                       type="number"
                       min={1}
                       value={p.paginationTotal}
                       onChange={(e) => p.setPaginationTotal(Number(e.target.value) || 1)}
-                      className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/25"
+                      className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-base text-zinc-100 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/25"
                     />
                   </label>
                 </div>
               )}
               {!p.paginationEnabled && p.responseShape === "array" && (
                 <label className="block max-w-[200px] space-y-1.5">
-                  <span className="text-xs text-zinc-400">Số phần tử</span>
+                  <span className="text-base text-zinc-400">Số phần tử</span>
                   <input
                     type="number"
                     min={1}
@@ -330,7 +330,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
                     onChange={(e) =>
                       p.setArrayItemCount(Math.min(100, Math.max(1, Number(e.target.value) || 1)))
                     }
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/25"
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-base text-zinc-100 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/25"
                   />
                 </label>
               )}
@@ -357,7 +357,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
         />
         <div className="space-y-6 pl-0 sm:pl-[52px]">
           <label className="block max-w-md space-y-1.5">
-            <span className="text-xs text-zinc-400">Faker locale</span>
+            <span className="text-base text-zinc-400">Faker locale</span>
             <NativeSelect ui="surface" value={p.dataLocale} onChange={(e) => p.setDataLocale(e.target.value)}>
               {p.locales.map((l) => (
                 <option key={l.code} value={l.code}>
@@ -370,7 +370,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
           <div>
             <div className="mb-3 flex items-center gap-2">
               <IconBraces size={16} className="text-zinc-500" />
-              <span className="text-xs font-medium text-zinc-400">Response template</span>
+              <span className="text-base font-medium text-zinc-400">Response template</span>
             </div>
             <div className="grid gap-2 sm:grid-cols-2">
               {p.templatePresets.map((tp) => (
@@ -384,8 +384,8 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
                       : "border-zinc-800/90 bg-zinc-900/40 hover:border-zinc-600"
                   }`}
                 >
-                  <span className="block text-sm font-medium text-zinc-100">{tp.title}</span>
-                  <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500">
+                  <span className="block text-base font-medium text-zinc-100">{tp.title}</span>
+                  <span className="mt-0.5 block text-base leading-snug text-zinc-500">
                     {tp.description}
                   </span>
                 </button>
@@ -393,18 +393,18 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
             </div>
             {p.responseTemplateId === "json_api_like" && (
               <label className="mt-4 block max-w-sm space-y-1.5">
-                <span className="text-xs text-zinc-400">Resource type</span>
+                <span className="text-base text-zinc-400">Resource type</span>
                 <input
                   value={p.responseTemplateResourceType}
                   onChange={(e) => p.setResponseTemplateResourceType(e.target.value.slice(0, 64))}
                   placeholder="users"
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 font-mono text-sm text-zinc-100 placeholder:text-zinc-600"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 font-mono text-base text-zinc-100 placeholder:text-zinc-600"
                 />
               </label>
             )}
             {p.responseTemplateId === "custom" && (
               <label className="mt-4 block space-y-1.5">
-                <span className="flex items-center gap-1 text-xs text-zinc-400">
+                <span className="flex items-center gap-1 text-base text-zinc-400">
                   JSON
                   <InfoPopover label="Custom JSON" panelClassName="w-64">
                     <p>Object hoặc array. Phải có ít nhất một giá trị đúng bằng chuỗi "$body".</p>
@@ -416,7 +416,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
                   rows={8}
                   spellCheck={false}
                   placeholder='{ "data": "$body" }'
-                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 p-3 font-mono text-[11px] text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25"
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-950 p-3 font-mono text-base text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25"
                 />
               </label>
             )}
@@ -441,7 +441,7 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
           <button
             type="button"
             onClick={() => p.addField()}
-            className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-2 text-xs text-zinc-300 hover:border-violet-500/45 hover:text-violet-300"
+            className="inline-flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900/50 px-4 py-2 text-base text-zinc-300 hover:border-violet-500/45 hover:text-violet-300"
           >
             <IconPlus size={14} />
             Thêm field
@@ -464,17 +464,17 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
 
       {/* Advanced: progressive disclosure */}
       <details className="group rounded-2xl border border-zinc-800/50 bg-zinc-900/25 open:border-zinc-800/80">
-        <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 text-sm text-zinc-300 [&::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer list-none items-center gap-3 px-4 py-4 text-base text-zinc-300 [&::-webkit-details-marker]:hidden">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-800/50 text-zinc-400">
             <IconGauge size={18} />
           </span>
           <span className="flex-1 font-medium">Nâng cao</span>
-          <span className="text-[11px] text-zinc-500">Latency · Status roulette</span>
+          <span className="text-base text-zinc-500">Latency · Status roulette</span>
         </summary>
         <div className="space-y-6 border-t border-zinc-800/40 px-4 pb-6 pt-5">
           <div className="grid max-w-md grid-cols-2 gap-4">
             <label className="space-y-1.5">
-              <span className="flex items-center gap-1 text-xs text-zinc-400">
+              <span className="flex items-center gap-1 text-base text-zinc-400">
                 Latency min (ms)
                 <InfoPopover label="Latency" panelClassName="w-56">
                   <p>Trễ ngẫu nhiên trong khoảng min–max trước khi trả body (ms).</p>
@@ -486,18 +486,18 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
                 value={p.latencyMin}
                 onChange={(e) => p.setLatencyMin(Math.max(0, Number(e.target.value) || 0))}
                 placeholder="0"
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600"
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-base text-zinc-100 placeholder:text-zinc-600"
               />
             </label>
             <label className="space-y-1.5">
-              <span className="text-xs text-zinc-400">Latency max (ms)</span>
+              <span className="text-base text-zinc-400">Latency max (ms)</span>
               <input
                 type="number"
                 min={0}
                 value={p.latencyMax}
                 onChange={(e) => p.setLatencyMax(Math.max(0, Number(e.target.value) || 0))}
                 placeholder="0"
-                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600"
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-base text-zinc-100 placeholder:text-zinc-600"
               />
             </label>
           </div>
@@ -513,11 +513,11 @@ export function EndpointFormSections(p: EndpointFormSectionsProps) {
       </details>
 
       <details className="group rounded-2xl border border-zinc-800/40 bg-transparent">
-        <summary className="flex cursor-pointer list-none items-center gap-2 px-1 py-2 text-xs text-zinc-500 [&::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-1 py-2 text-base text-zinc-500 [&::-webkit-details-marker]:hidden">
           <IconCode size={14} />
           schemaConfig JSON
         </summary>
-        <pre className="mt-2 max-h-48 overflow-auto rounded-xl border border-zinc-800/50 bg-zinc-900/50 p-4 text-[11px] text-zinc-500">
+        <pre className="mt-2 max-h-48 overflow-auto rounded-xl border border-zinc-800/50 bg-zinc-900/50 p-4 text-base text-zinc-500">
           {p.schemaJsonPretty}
         </pre>
       </details>

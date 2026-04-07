@@ -28,7 +28,7 @@ export function DashboardBreadcrumbs() {
   }
 
   return (
-    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 text-sm">
+    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 text-base">
       <Link
         to="/projects"
         className="inline-flex items-center text-zinc-400 transition-colors hover:text-zinc-50"

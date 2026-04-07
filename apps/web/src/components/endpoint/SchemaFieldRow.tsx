@@ -35,7 +35,7 @@ function SliderRow({
 }) {
   return (
     <div className="space-y-1">
-      <div className="flex justify-between gap-2 text-xs text-zinc-400">
+      <div className="flex justify-between gap-2 text-base text-zinc-400">
         <span>{label}</span>
         <span className="tabular-nums text-zinc-300">{value}%</span>
       </div>
@@ -67,16 +67,16 @@ export function SchemaFieldRow({
     <div className="rounded-2xl border border-zinc-800/80 bg-zinc-900/40 p-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1fr)_10.5rem_11.5rem_2.75rem] sm:items-end sm:gap-3">
         <label className="min-w-0 space-y-1.5">
-          <span className="text-xs text-zinc-400">Key</span>
+          <span className="text-base text-zinc-400">Key</span>
           <input
             value={row.key}
             onChange={(e) => onChange({ ...row, key: e.target.value })}
             placeholder="email"
-            className="min-h-10 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-sm text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25"
+            className="min-h-10 w-full rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 font-mono text-base text-zinc-100 outline-none placeholder:text-zinc-600 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25"
           />
         </label>
         <label className="min-w-0 w-full space-y-1.5 sm:w-[10.5rem] sm:max-w-[10.5rem]">
-          <span className="text-xs text-zinc-400">Kiểu</span>
+          <span className="text-base text-zinc-400">Kiểu</span>
           <NativeSelect
             ui="surfaceRaised"
             value={row.type}
@@ -93,7 +93,7 @@ export function SchemaFieldRow({
           </NativeSelect>
         </label>
         <label className="min-w-0 w-full space-y-1.5 sm:w-[11.5rem] sm:max-w-[11.5rem]">
-          <span className="text-xs text-zinc-400">Faker</span>
+          <span className="text-base text-zinc-400">Faker</span>
           <NativeSelect
             ui="surfaceRaised"
             value={row.faker}
@@ -122,15 +122,15 @@ export function SchemaFieldRow({
         className="mt-4 rounded-xl border border-zinc-800/60 bg-zinc-900/30 open:border-zinc-700"
         open={variantActive}
       >
-        <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-xs text-zinc-400 [&::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-3 py-2.5 text-base text-zinc-400 [&::-webkit-details-marker]:hidden">
           <IconZap size={14} className={variantActive ? "text-rose-400/90" : "text-zinc-600"} />
           <span className="font-medium text-zinc-300">Mô phỏng lỗi dữ liệu</span>
           {variantActive ? (
-            <span className="rounded-md bg-rose-500/15 px-1.5 py-0.5 text-[10px] text-rose-200/90">
+            <span className="rounded-md bg-rose-500/15 px-1.5 py-0.5 text-base text-rose-200/90">
               bật
             </span>
           ) : (
-            <span className="text-[10px] text-zinc-600">tùy chọn</span>
+            <span className="text-base text-zinc-600">tùy chọn</span>
           )}
           <span className="ml-auto">
             <InfoPopover label="Cách hoạt động" panelClassName="w-72">
@@ -139,7 +139,7 @@ export function SchemaFieldRow({
                   Ba tỷ lệ (bỏ trường · null · giá trị xấu) không vượt quá 100% tổng; phần còn lại là dữ liệu chuẩn
                   (Faker).
                 </p>
-                <ul className="list-inside list-disc space-y-1 text-[11px]">
+                <ul className="list-inside list-disc space-y-1 text-base">
                   <li>
                     <strong className="text-zinc-200">Bỏ trường</strong> — thiếu key trong JSON.
                   </li>
@@ -155,7 +155,7 @@ export function SchemaFieldRow({
           </span>
         </summary>
         <div className="space-y-4 border-t border-zinc-800/50 px-3 pb-4 pt-3">
-          <p className="text-xs text-zinc-500">
+          <p className="text-base text-zinc-500">
             Chuẩn (Faker): <span className="font-semibold tabular-nums text-emerald-400/90">{happyPercent}%</span>
           </p>
           <div className="grid gap-4 sm:grid-cols-3">
@@ -178,11 +178,11 @@ export function SchemaFieldRow({
             />
           </div>
           <label className="block max-w-md space-y-1.5">
-            <span className="flex items-center gap-1.5 text-xs leading-none text-zinc-400">
+            <span className="flex items-center gap-1.5 text-base leading-none text-zinc-400">
               Mẫu giá trị xấu
               <InfoPopover label="Mẫu giá trị xấu" panelClassName="w-72">
                 <p className="mb-2 text-zinc-400">Chọn kiểu giá trị lỗi khi % giá trị xấu kích hoạt.</p>
-                <p className="text-[11px] text-zinc-500">Mô tả từng mẫu hiện dưới dropdown khi % &gt; 0.</p>
+                <p className="text-base text-zinc-500">Mô tả từng mẫu hiện dưới dropdown khi % &gt; 0.</p>
               </InfoPopover>
             </span>
             <NativeSelect
@@ -209,7 +209,7 @@ export function SchemaFieldRow({
                   ))}
             </NativeSelect>
             {row.edgePercent > 0 ? (
-              <p className="text-[11px] leading-snug text-zinc-500">
+              <p className="text-base leading-snug text-zinc-500">
                 {EDGE_HELP_VI[row.edgePreset] ?? "Giá trị stress cho preset này."}
               </p>
             ) : null}

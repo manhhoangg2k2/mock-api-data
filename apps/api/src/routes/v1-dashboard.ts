@@ -2,7 +2,7 @@ import { and, asc, count, eq } from "drizzle-orm";
 import type { FastifyInstance } from "fastify";
 import { parseSchemaConfig } from "../deps/shared.js";
 import { ZodError, z } from "zod";
-import { MAX_ENDPOINTS_PER_USER, MAX_PROJECTS_PER_USER } from "../const/limits.js";
+import { MAX_ENDPOINTS_PER_PROJECT, MAX_PROJECTS_PER_USER } from "../const/limits.js";
 import { db } from "../db/client.js";
 import { endpoints, projects } from "../db/schema.js";
 import { generateFromConfig } from "../services/generate-response.js";
@@ -22,8 +22,8 @@ async function countProjects(userId: string): Promise<number> {
   return Number(row?.n ?? 0);
 }
 
-async function countEndpoints(userId: string): Promise<number> {
-  const [row] = await db.select({ n: count() }).from(endpoints).where(eq(endpoints.userId, userId));
+async function countEndpointsInProject(projectId: string): Promise<number> {
+  const [row] = await db.select({ n: count() }).from(endpoints).where(eq(endpoints.projectId, projectId));
   return Number(row?.n ?? 0);
 }
 
@@ -67,15 +67,28 @@ const previewBody = z.object({
 export async function registerV1DashboardRoutes(app: FastifyInstance) {
   const auth = { onRequest: [app.authenticate] };
 
-  app.get("/v1/me/quotas", auth, async (request) => {
+  app.get<{ Querystring: { projectId?: string } }>("/v1/me/quotas", auth, async (request, reply) => {
     const userId = (request.user as { sub: string }).sub;
-    const used = await countEndpoints(userId);
-    const max = MAX_ENDPOINTS_PER_USER;
+    const projectId = request.query?.projectId?.trim();
+
+    let endpointUsed = 0;
+    if (projectId) {
+      const p = await getProjectForUser(projectId, userId);
+      if (!p) return reply.status(404).send({ error: "not_found" });
+      endpointUsed = await countEndpointsInProject(projectId);
+    }
+
+    const projectUsed = await countProjects(userId);
     return {
+      projects: {
+        used: projectUsed,
+        max: MAX_PROJECTS_PER_USER,
+        remaining: Math.max(0, MAX_PROJECTS_PER_USER - projectUsed),
+      },
       endpoints: {
-        used,
-        max,
-        remaining: Math.max(0, max - used),
+        used: endpointUsed,
+        max: MAX_ENDPOINTS_PER_PROJECT,
+        remaining: Math.max(0, MAX_ENDPOINTS_PER_PROJECT - endpointUsed),
       },
     };
   });
@@ -228,11 +241,11 @@ export async function registerV1DashboardRoutes(app: FastifyInstance) {
       return reply.status(400).send({ error: "invalid_path", message: "Path không hợp lệ." });
     }
 
-    const n = await countEndpoints(userId);
-    if (n >= MAX_ENDPOINTS_PER_USER) {
+    const n = await countEndpointsInProject(projectId);
+    if (n >= MAX_ENDPOINTS_PER_PROJECT) {
       return reply.status(403).send({
         error: "quota_exceeded",
-        message: `Tối đa ${MAX_ENDPOINTS_PER_USER} endpoint (free tier).`,
+        message: `Mỗi project tối đa ${MAX_ENDPOINTS_PER_PROJECT} endpoint (free tier).`,
       });
     }
 

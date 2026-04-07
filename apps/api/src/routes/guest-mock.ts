@@ -41,6 +41,88 @@ function clampLimitQuery(
   return next;
 }
 
+type GuestChaosRule = {
+  key: string;
+  omitPercent?: number;
+  nullPercent?: number;
+  edgePercent?: number;
+};
+
+function stripFieldChaos(schemaConfig: unknown): unknown {
+  if (!schemaConfig || typeof schemaConfig !== "object") return schemaConfig;
+  const src = schemaConfig as Record<string, unknown>;
+  const rawFields = Array.isArray(src.fields) ? src.fields : [];
+  const fields = rawFields.map((f) => {
+    if (!f || typeof f !== "object") return f;
+    const x = { ...(f as Record<string, unknown>) };
+    delete x.chaos;
+    return x;
+  });
+  return { ...src, fields };
+}
+
+function pickGuestChaosRule(schemaConfig: unknown): GuestChaosRule | null {
+  if (!schemaConfig || typeof schemaConfig !== "object") return null;
+  const src = schemaConfig as Record<string, unknown>;
+  const rawFields = Array.isArray(src.fields) ? src.fields : [];
+  for (const f of rawFields) {
+    if (!f || typeof f !== "object") continue;
+    const row = f as Record<string, unknown>;
+    const key = typeof row.key === "string" ? row.key.trim() : "";
+    if (!key) continue;
+    const chaos = row.chaos as Record<string, unknown> | undefined;
+    if (!chaos || typeof chaos !== "object") continue;
+    const omitPercent = Number(chaos.omitPercent ?? 0);
+    const nullPercent = Number(chaos.nullPercent ?? 0);
+    const edgePercent = Number(chaos.edgePercent ?? 0);
+    if (omitPercent > 0 || nullPercent > 0 || edgePercent > 0) {
+      return { key, omitPercent, nullPercent, edgePercent };
+    }
+  }
+  return null;
+}
+
+function applySingleRecordChaos(body: unknown, rule: GuestChaosRule | null): { body: unknown; chaos: unknown[] } {
+  if (!rule) return { body, chaos: [] };
+
+  const applyToObject = (obj: Record<string, unknown>) => {
+    if (rule.omitPercent && rule.omitPercent > 0) {
+      delete obj[rule.key];
+      return { path: rule.key, kind: "omit" };
+    }
+    if (rule.nullPercent && rule.nullPercent > 0) {
+      obj[rule.key] = null;
+      return { path: rule.key, kind: "null" };
+    }
+    if (rule.edgePercent && rule.edgePercent > 0) {
+      obj[rule.key] = "edge";
+      return { path: rule.key, kind: "edge" };
+    }
+    return null;
+  };
+
+  if (Array.isArray(body) && body.length > 0 && body[0] && typeof body[0] === "object") {
+    const next = body.map((x) => (x && typeof x === "object" ? { ...(x as Record<string, unknown>) } : x));
+    const applied = applyToObject(next[0] as Record<string, unknown>);
+    return { body: next, chaos: applied ? [applied] : [] };
+  }
+
+  if (body && typeof body === "object") {
+    const root = { ...(body as Record<string, unknown>) };
+    const data = root.data;
+    if (Array.isArray(data) && data.length > 0 && data[0] && typeof data[0] === "object") {
+      const nextData = data.map((x) => (x && typeof x === "object" ? { ...(x as Record<string, unknown>) } : x));
+      const applied = applyToObject(nextData[0] as Record<string, unknown>);
+      root.data = nextData;
+      return { body: root, chaos: applied ? [applied] : [] };
+    }
+    const applied = applyToObject(root);
+    return { body: root, chaos: applied ? [applied] : [] };
+  }
+
+  return { body, chaos: [] };
+}
+
 export const guestMockRoutes: FastifyPluginAsync = async (app) => {
   // Create / release a guest endpoint (no auth)
   app.post("/v1/guest/endpoints", async (request, reply) => {
@@ -256,9 +338,12 @@ export const guestMockRoutes: FastifyPluginAsync = async (app) => {
       const rawQuery = request.query as Record<string, string | string[] | undefined>;
       const query = clampLimitQuery(rawQuery);
 
-      const { body, chaos } = generateFromConfig(endpoint.schemaConfig, query);
-      reply.header("X-DevMock-Chaos", encodeURIComponent(JSON.stringify(chaos)));
-      reply.send(body);
+      const cleanSchemaConfig = stripFieldChaos(endpoint.schemaConfig);
+      const base = generateFromConfig(cleanSchemaConfig, query);
+      const rule = pickGuestChaosRule(endpoint.schemaConfig);
+      const next = applySingleRecordChaos(base.body, rule);
+      reply.header("X-PaperMock-Chaos", encodeURIComponent(JSON.stringify(next.chaos)));
+      reply.send(next.body);
     },
   });
 };

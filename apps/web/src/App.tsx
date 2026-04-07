@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { DashboardLayout } from "@/components/dashboard/DashboardLayout";
@@ -12,6 +12,12 @@ import { Projects } from "@/pages/Projects";
 import { DashboardSettingsPage } from "@/pages/dashboard/DashboardSettingsPage";
 import { DashboardUsagePage } from "@/pages/dashboard/DashboardUsagePage";
 
+/** Giữ link cũ `/auth?tab=register` — chuyển sang route chuẩn. */
+function AuthLegacyRedirect() {
+  const [sp] = useSearchParams();
+  return <Navigate to={sp.get("tab") === "register" ? "/register" : "/login"} replace />;
+}
+
 export default function App() {
   return (
     <Routes>
@@ -19,9 +25,9 @@ export default function App() {
       <Route element={<Layout />}>
         <Route path="/overview" element={<Navigate to="/docs" replace />} />
         <Route path="/docs" element={<Documentation />} />
-        <Route path="/auth" element={<AuthPage />} />
-        <Route path="/login" element={<Navigate to="/auth?tab=login" replace />} />
-        <Route path="/register" element={<Navigate to="/auth?tab=register" replace />} />
+        <Route path="/auth" element={<AuthLegacyRedirect />} />
+        <Route path="/login" element={<AuthPage />} />
+        <Route path="/register" element={<AuthPage />} />
       </Route>
 
       <Route

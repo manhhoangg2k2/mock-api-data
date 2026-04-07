@@ -35,8 +35,8 @@ export function ConfirmDialog({
 
   const confirmBtn =
     variant === "danger"
-      ? "rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-rose-900/30 transition hover:bg-rose-500 active:scale-[0.98]"
-      : "rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-md shadow-violet-900/30 transition hover:bg-violet-500 active:scale-[0.98]";
+      ? "rounded-lg bg-rose-600 px-4 py-2 text-base font-semibold text-white shadow-md shadow-rose-900/30 transition hover:bg-rose-500 active:scale-[0.98]"
+      : "rounded-lg bg-violet-600 px-4 py-2 text-base font-semibold text-white shadow-md shadow-violet-900/30 transition hover:bg-violet-500 active:scale-[0.98]";
 
   return (
     <div
@@ -56,14 +56,14 @@ export function ConfirmDialog({
         <h2 id="confirm-dialog-title" className="text-lg font-semibold tracking-tight text-zinc-50">
           {title}
         </h2>
-        <p id="confirm-dialog-desc" className="mt-2 text-sm leading-relaxed text-zinc-400">
+        <p id="confirm-dialog-desc" className="mt-2 text-base leading-relaxed text-zinc-400">
           {message}
         </p>
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-zinc-700 bg-zinc-950/50 px-4 py-2 text-sm font-medium text-zinc-300 transition hover:border-zinc-600 hover:bg-zinc-800/50"
+            className="rounded-lg border border-zinc-700 bg-zinc-950/50 px-4 py-2 text-base font-medium text-zinc-300 transition hover:border-zinc-600 hover:bg-zinc-800/50"
           >
             {cancelLabel}
           </button>

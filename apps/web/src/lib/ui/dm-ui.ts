@@ -25,11 +25,11 @@ export const dm = {
   // Buttons
   btn: {
     primary:
-      "rounded-lg bg-violet-500 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-violet-500/20 transition-colors hover:bg-violet-600 active:scale-[0.98] disabled:opacity-50",
+      "rounded-lg bg-violet-500 px-6 py-3 text-base font-bold text-white shadow-lg shadow-violet-500/20 transition-colors hover:bg-violet-600 active:scale-[0.98] disabled:opacity-50",
     outline:
-      "rounded-lg border border-zinc-700 bg-transparent px-6 py-2.5 text-sm font-semibold text-zinc-300 transition-colors hover:bg-zinc-800/40 disabled:opacity-50",
+      "rounded-lg border border-zinc-700 bg-transparent px-6 py-3 text-base font-semibold text-zinc-300 transition-colors hover:bg-zinc-800/40 disabled:opacity-50",
     ghost:
-      "rounded-lg px-3 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-800/50 hover:text-zinc-100",
+      "rounded-lg px-3 py-2.5 text-base font-medium text-zinc-300 transition-colors hover:bg-zinc-800/50 hover:text-zinc-100",
   },
 
   panel: {
@@ -41,11 +41,11 @@ export const dm = {
 
   badge: {
     release:
-      "inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-950/25 px-3 py-1 text-[0.6875rem] font-medium uppercase tracking-widest text-amber-100",
+      "inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-950/25 px-3 py-1 text-base font-medium uppercase tracking-widest text-amber-100",
     warning:
-      "inline-flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-950/25 px-4 py-3 text-left text-sm text-amber-100/90",
+      "inline-flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-950/25 px-4 py-3 text-left text-base text-amber-100/90",
     popular:
-      "absolute -top-3 right-6 translate-y-1/2 rounded-full bg-violet-500 px-3 py-1 text-[0.6rem] font-bold uppercase tracking-tighter text-white",
+      "absolute -top-3 right-6 translate-y-1/2 rounded-full bg-violet-500 px-3 py-1.5 text-base font-bold uppercase tracking-tight text-white",
   },
 
   heading: {
@@ -56,8 +56,8 @@ export const dm = {
 
   code: {
     pre:
-      "font-mono text-[0.75rem] leading-relaxed text-zinc-300 overflow-hidden",
-    inlineUrl: "font-mono text-sm text-violet-500",
+      "font-mono text-base leading-relaxed text-zinc-300 overflow-hidden",
+    inlineUrl: "font-mono text-base text-violet-500",
     highlightLine: "bg-rose-950/50 text-rose-200",
   },
 } as const;

@@ -44,4 +44,4 @@ export const FALLBACK_HINTS: SchemaHints = {
   responseTemplatePresets: FALLBACK_TEMPLATE_PRESETS,
 };
 
-export const TOUR_STORAGE_KEY = "devmock_endpoint_builder_tour_v1";
+export const TOUR_STORAGE_KEY = "PaperMock_endpoint_builder_tour_v1";

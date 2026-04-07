@@ -51,7 +51,7 @@ export function InfoPopover({ children, label = "Thông tin thêm", panelClassNa
           id={panelId}
           role="region"
           aria-labelledby={btnId}
-          className={`absolute left-0 top-full z-50 mt-1.5 ${panelClassName} rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-left text-xs leading-relaxed text-zinc-300 shadow-xl`}
+          className={`absolute left-0 top-full z-50 mt-1.5 ${panelClassName} rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-left text-base leading-relaxed text-zinc-300 shadow-xl`}
         >
           {children}
         </div>

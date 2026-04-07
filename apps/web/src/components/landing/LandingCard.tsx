@@ -13,7 +13,7 @@ export function LandingCard({ icon, title, description }: LandingCardProps) {
         {icon}
       </div>
       <h3 className="text-lg font-semibold text-zinc-100">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-zinc-400">{description}</p>
+      <p className="mt-2 text-base leading-relaxed text-zinc-400">{description}</p>
     </div>
   );
 }

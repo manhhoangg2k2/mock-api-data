@@ -28,9 +28,9 @@ export default {
         "app-loader-dot": "app-loader-dot 1.15s ease-in-out infinite",
       },
       fontFamily: {
-        /** Vercel Geist — UI sans + code mono */
-        sans: ['"Geist Sans"', "ui-sans-serif", "system-ui", "sans-serif"],
-        mono: ['"Geist Mono"', "ui-monospace", "monospace"],
+        /** Global typography: Inter for UI, JetBrains Mono for code/json */
+        sans: ['"Inter"', "ui-sans-serif", "system-ui", "sans-serif"],
+        mono: ['"JetBrains Mono"', "ui-monospace", "monospace"],
       },
       colors: {
         /** Đồng bộ với dashboard (zinc) + nhấn violet */

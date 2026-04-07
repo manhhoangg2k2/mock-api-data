@@ -10,7 +10,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <AppLoadingScreen layout="embedded" message="Đang xác thực phiên…" showBrand={false} />;
   }
   if (!token) {
-    return <Navigate to="/auth?tab=login" replace state={{ from: loc.pathname }} />;
+    return <Navigate to="/login" replace state={{ from: loc.pathname }} />;
   }
   return <>{children}</>;
 }

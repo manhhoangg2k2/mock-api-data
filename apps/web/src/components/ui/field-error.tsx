@@ -9,8 +9,8 @@ type FieldErrorProps = {
 };
 
 const sizeClass: Record<NonNullable<FieldErrorProps["size"]>, string> = {
-  default: "mt-1.5 text-sm leading-snug",
-  compact: "mt-1 text-[11px] leading-snug",
+  default: "mt-1.5 text-base leading-snug",
+  compact: "mt-1 text-base leading-snug",
 };
 
 const variantClass: Record<NonNullable<FieldErrorProps["variant"]>, string> = {

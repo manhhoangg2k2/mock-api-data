@@ -46,15 +46,15 @@ export function EndpointsTable({ projectId, rows, onDelete, mockUrlPrefix }: Pro
   return (
     <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/30">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[720px] border-collapse text-left text-sm">
+        <table className="w-full min-w-[720px] border-collapse text-left text-base">
           <thead>
             <tr className="border-b border-zinc-800 bg-zinc-900/80">
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Method</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">Path</th>
-              <th className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <th className="px-4 py-3 text-base font-semibold uppercase tracking-wider text-zinc-500">Method</th>
+              <th className="px-4 py-3 text-base font-semibold uppercase tracking-wider text-zinc-500">Path</th>
+              <th className="px-4 py-3 text-base font-semibold uppercase tracking-wider text-zinc-500">
                 Mô phỏng lỗi
               </th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <th className="px-4 py-3 text-right text-base font-semibold uppercase tracking-wider text-zinc-500">
                 Thao tác
               </th>
             </tr>
@@ -71,11 +71,11 @@ export function EndpointsTable({ projectId, rows, onDelete, mockUrlPrefix }: Pro
                   </td>
                   <td className="px-4 py-3 align-middle">
                     <div className="flex flex-wrap items-center gap-2">
-                      <code className="font-mono text-[0.8125rem] text-violet-300/95">/{ep.pathNormalized}</code>
+                      <code className="font-mono text-base text-violet-300/95">/{ep.pathNormalized}</code>
                       <button
                         type="button"
                         onClick={() => void copyFullUrl(ep.pathNormalized, ep.id)}
-                        className="inline-flex shrink-0 items-center gap-1 rounded-md border border-zinc-700 bg-zinc-950/80 px-2 py-1 text-[10px] font-medium text-zinc-400 transition hover:border-violet-500/45 hover:text-violet-300"
+                        className="inline-flex shrink-0 items-center gap-1 rounded-md border border-zinc-700 bg-zinc-950/80 px-2 py-1 text-base font-medium text-zinc-400 transition hover:border-violet-500/45 hover:text-violet-300"
                         title={fullPreview}
                         aria-label="Copy URL mock đầy đủ"
                       >
@@ -88,7 +88,7 @@ export function EndpointsTable({ projectId, rows, onDelete, mockUrlPrefix }: Pro
                       </button>
                     </div>
                     {(ep.latencyMsMin ?? 0) > 0 || (ep.latencyMsMax ?? 0) > 0 ? (
-                      <p className="mt-1 text-[0.65rem] text-zinc-600">
+                      <p className="mt-1 text-base text-zinc-600">
                         Độ trễ: {ep.latencyMsMin ?? 0}–{ep.latencyMsMax ?? 0} ms
                       </p>
                     ) : null}
@@ -96,14 +96,14 @@ export function EndpointsTable({ projectId, rows, onDelete, mockUrlPrefix }: Pro
                   <td className="max-w-[200px] px-4 py-3 align-middle">
                     {chaosPct > 0 ? (
                       <span
-                        className="inline-flex rounded-md border border-amber-500/30 bg-amber-950/35 px-2 py-1.5 text-xs font-medium leading-snug text-amber-200/95"
+                        className="inline-flex rounded-md border border-amber-500/30 bg-amber-950/35 px-2 py-1.5 text-base font-medium leading-snug text-amber-200/95"
                         title={chaosVi.detail}
                       >
                         {chaosVi.line}
                       </span>
                     ) : (
                       <span
-                        className="inline-flex rounded-md border border-zinc-700 bg-zinc-950/60 px-2 py-1.5 text-xs leading-snug text-zinc-400"
+                        className="inline-flex rounded-md border border-zinc-700 bg-zinc-950/60 px-2 py-1.5 text-base leading-snug text-zinc-400"
                         title={chaosVi.detail}
                       >
                         {chaosVi.line}
@@ -114,7 +114,7 @@ export function EndpointsTable({ projectId, rows, onDelete, mockUrlPrefix }: Pro
                     <div className="flex justify-end gap-1">
                       <Link
                         to={`/projects/${projectId}/endpoints/${ep.id}`}
-                        className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 px-2.5 py-1.5 text-xs font-medium text-zinc-300 transition hover:border-violet-500/50 hover:text-violet-300"
+                        className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 px-2.5 py-1.5 text-base font-medium text-zinc-300 transition hover:border-violet-500/50 hover:text-violet-300"
                       >
                         <Pencil className="h-3.5 w-3.5" aria-hidden />
                         Sửa
@@ -122,7 +122,7 @@ export function EndpointsTable({ projectId, rows, onDelete, mockUrlPrefix }: Pro
                       <button
                         type="button"
                         onClick={() => onDelete(ep.id)}
-                        className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 px-2.5 py-1.5 text-xs font-medium text-zinc-400 transition hover:border-rose-500/40 hover:bg-rose-950/30 hover:text-rose-300"
+                        className="inline-flex items-center gap-1 rounded-lg border border-zinc-700 px-2.5 py-1.5 text-base font-medium text-zinc-400 transition hover:border-rose-500/40 hover:bg-rose-950/30 hover:text-rose-300"
                       >
                         <Trash2 className="h-3.5 w-3.5" aria-hidden />
                         Xóa

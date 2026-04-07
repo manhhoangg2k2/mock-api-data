@@ -156,7 +156,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <div
             key={t.id}
             role="status"
-            className={`pointer-events-auto flex gap-3 rounded-xl border px-3.5 py-3 text-sm font-medium leading-snug ${toastSurface(t.variant)}`}
+            className={`pointer-events-auto flex gap-3 rounded-xl border px-3.5 py-3 text-base font-medium leading-snug ${toastSurface(t.variant)}`}
           >
             <ToastIcon variant={t.variant} />
             <p className="min-w-0 flex-1 pt-0.5">{t.message}</p>

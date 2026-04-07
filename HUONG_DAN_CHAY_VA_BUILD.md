@@ -1,6 +1,6 @@
-# Hướng dẫn chạy và build DevMock
+# Hướng dẫn chạy và build PaperMock
 
-Tài liệu này mô tả cách cài đặt, chạy môi trường phát triển và build bản production cho monorepo **DevMock** (`apps/api` + `apps/web` + `packages/shared`).
+Tài liệu này mô tả cách cài đặt, chạy môi trường phát triển và build bản production cho monorepo **PaperMock** (`apps/api` + `apps/web` + `packages/shared`).
 
 ---
 
@@ -94,7 +94,7 @@ pnpm dev:web
 
 | Lệnh | Mục đích |
 |------|----------|
-| `pnpm dev` | Build `@devmock/shared` + chạy API dev |
+| `pnpm dev` | Build `@papermock/shared` + chạy API dev |
 | `pnpm dev:api` | Giống `pnpm dev` |
 | `pnpm dev:web` | Chỉ frontend Vite |
 
@@ -135,7 +135,7 @@ pnpm build:web
 Output: `apps/web/dist` (file tĩnh). Xem thử cục bộ:
 
 ```bash
-pnpm --filter @devmock/web preview
+pnpm --filter @papermock/web preview
 ```
 
 ---
@@ -162,7 +162,7 @@ pnpm --filter @devmock/web preview
 |------------|-------------|
 | `DATABASE_URL is not set` | Kiểm tra `.env` ở **gốc monorepo**, không có khoảng trắng thừa quanh `=`. |
 | Web không gọi được API | API có đang chạy? Port 3000 có bị chiếm? Đồng bộ `PORT` với `VITE_DEV_API_PROXY`. |
-| Build API lỗi thiếu `@devmock/shared` | Luôn `pnpm build` từ root (build shared trước api). |
+| Build API lỗi thiếu `@papermock/shared` | Luôn `pnpm build` từ root (build shared trước api). |
 | Lockfile lệch trên CI | Chạy `pnpm install` local, commit `pnpm-lock.yaml`. |
 
 ---

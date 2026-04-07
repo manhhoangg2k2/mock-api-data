@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Link, Navigate, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ApiError } from "@/lib/api";
+import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { ApiError, apiFetch } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { FieldError } from "@/components/ui/field-error";
-import { AppLoadingScreen } from "@/components/ui/AppLoadingScreen";
+import { AppLoadingScreen, BlockingLoadingOverlay } from "@/components/ui/AppLoadingScreen";
 
 const SLUG_PATTERN = "[a-z0-9]+(?:-[a-z0-9]+)*";
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{1,30}[a-z0-9])?$/;
@@ -40,29 +40,19 @@ function EyeSlashIcon({ className }: { className?: string }) {
   );
 }
 
-function GoogleMark({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" aria-hidden>
-      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-    </svg>
-  );
-}
-
 export function AuthPage() {
   const { login, register, loginWithGoogle, token, ready } = useAuth();
   const toast = useToast();
   const nav = useNavigate();
   const loc = useLocation();
-  const [searchParams] = useSearchParams();
   const from = (loc.state as { from?: string } | null)?.from ?? "/projects";
 
-  const tab: "login" | "register" = searchParams.get("tab") === "register" ? "register" : "login";
+  const tab: "login" | "register" = loc.pathname === "/register" ? "register" : "login";
+  const loadingMessage = tab === "login" ? "Đang đăng nhập…" : "Đang xử lý đăng ký…";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [loginPwVisible, setLoginPwVisible] = useState(false);
   const [regPwVisible, setRegPwVisible] = useState(false);
 
@@ -73,6 +63,8 @@ export function AuthPage() {
   const [err, setErr] = useState<string | null>(null);
   const [loginEmailErr, setLoginEmailErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [sendingCode, setSendingCode] = useState(false);
+  const [codeSent, setCodeSent] = useState(false);
 
   const googleBtnRef = useRef<HTMLDivElement>(null);
   const googleDidInitRef = useRef(false);
@@ -113,65 +105,112 @@ export function AuthPage() {
     [from, nav, tab, toast]
   );
 
-  useEffect(() => {
+  const mountGoogleButton = useCallback(() => {
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
-    const el = googleBtnRef.current;
-    if (!clientId || !el) return;
+    const host = googleBtnRef.current;
+    if (!clientId || !host || !window.google?.accounts?.id) return;
 
-    let cancelled = false;
-    let interval = 0;
+    const g = window.google.accounts.id;
+    if (!googleDidInitRef.current) {
+      g.initialize({
+        client_id: clientId,
+        callback: (res) => void handleGoogleCredential(res.credential),
+      });
+      googleDidInitRef.current = true;
+    }
 
-    const mountButton = () => {
-      const host = googleBtnRef.current;
-      if (cancelled || !window.google?.accounts?.id || !host) return;
-      const g = window.google.accounts.id;
-      if (!googleDidInitRef.current) {
-        g.initialize({
-          client_id: clientId,
-          callback: (res) => void handleGoogleCredential(res.credential),
-        });
-        googleDidInitRef.current = true;
-      }
-      host.innerHTML = "";
-      g.renderButton(host, {
+    const applyRender = () => {
+      if (!googleBtnRef.current || !window.google?.accounts?.id) return;
+      const h = googleBtnRef.current;
+      const w = Math.max(h.getBoundingClientRect().width, h.offsetWidth, 280);
+      h.innerHTML = "";
+      window.google.accounts.id.renderButton(h, {
         theme: "outline",
         size: "large",
-        width: host.clientWidth || 400,
+        width: Math.floor(w),
         type: "standard",
         text: tab === "login" ? "signin_with" : "signup_with",
         locale: "vi",
       });
     };
 
+    requestAnimationFrame(() => requestAnimationFrame(applyRender));
+  }, [handleGoogleCredential, tab]);
+
+  useEffect(() => {
+    const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim();
+    if (!clientId) return;
+
+    let cancelled = false;
+    let interval = 0;
+
+    const tryMount = () => {
+      if (cancelled) return false;
+      if (!googleBtnRef.current || !window.google?.accounts?.id) return false;
+      mountGoogleButton();
+      return true;
+    };
+
+    if (tryMount()) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
     interval = window.setInterval(() => {
-      if (window.google?.accounts?.id) {
-        window.clearInterval(interval);
-        mountButton();
-      }
+      if (tryMount()) window.clearInterval(interval);
     }, 50);
 
     return () => {
       cancelled = true;
       window.clearInterval(interval);
-      try {
-        window.google?.accounts?.id.cancel();
-      } catch {
-        /* ignore */
-      }
     };
-  }, [handleGoogleCredential, tab]);
+  }, [mountGoogleButton, tab]);
 
   function goTab(next: "login" | "register") {
     if (next !== tab) setPassword("");
     setErr(null);
     setLoginEmailErr(null);
     if (next === "register") setRegisterStep(1);
-    nav({ pathname: "/auth", search: `?tab=${next}` }, { replace: true, state: loc.state });
+    nav(next === "login" ? "/login" : "/register", { replace: true, state: loc.state });
   }
 
   useEffect(() => {
     if (tab !== "register") setRegisterStep(1);
   }, [tab]);
+
+  async function sendVerificationCode() {
+    const em = email.trim();
+    if (!EMAIL_RE.test(em)) {
+      const m = "Nhập email hợp lệ để nhận mã xác thực.";
+      setErr(m);
+      toast.warning(m);
+      return;
+    }
+    setErr(null);
+    setSendingCode(true);
+    try {
+      await apiFetch("/v1/auth/register/send-code", {
+        method: "POST",
+        json: { email: em },
+      });
+      setCodeSent(true);
+      toast.success("Đã gửi mã xác thực về email.");
+    } catch (e) {
+      if (e instanceof ApiError) {
+        const b = e.body as { message?: string };
+        const m = b?.message ?? e.message;
+        setErr(m);
+        toast.error(m);
+      } else {
+        const m = String(e);
+        setErr(m);
+        toast.error(m);
+      }
+    } finally {
+      setSendingCode(false);
+    }
+  }
 
   function continueRegisterToDisplayStep() {
     setErr(null);
@@ -190,6 +229,12 @@ export function AuthPage() {
     }
     if (!password || password.length < 8) {
       const m = "Mật khẩu tối thiểu 8 ký tự.";
+      setErr(m);
+      toast.warning(m);
+      return;
+    }
+    if (!verificationCode.trim() || verificationCode.trim().length < 4) {
+      const m = "Nhập mã xác thực từ email.";
       setErr(m);
       toast.warning(m);
       return;
@@ -254,7 +299,7 @@ export function AuthPage() {
     setErr(null);
     setLoading(true);
     try {
-      await register(username, publicSlug, email, password);
+      await register(username, publicSlug, email, password, verificationCode.trim());
       toast.success("Tạo tài khoản thành công.");
       setRegisterStep(1);
       nav("/projects", { replace: true });
@@ -307,21 +352,21 @@ export function AuthPage() {
         <div className="w-full max-w-[420px] px-2">
         <div className="mb-8 flex flex-col items-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-violet-600 shadow-[0_0_20px_rgba(139,92,246,0.35)]">
-            <span className="text-lg font-extrabold tracking-tighter text-white">DM</span>
+            <span className="text-lg font-extrabold tracking-tighter text-white">PM</span>
           </div>
-          <h1 className="text-lg font-bold uppercase tracking-tight text-zinc-100">DevMock</h1>
-          <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.2em] text-zinc-500">
+          <h1 className="text-lg font-bold uppercase tracking-tight text-zinc-100">PaperMock</h1>
+          <p className="mt-1 text-center text-base font-medium uppercase tracking-[0.2em] text-zinc-500">
             Mock API · dữ liệu giả thử nghiệm
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-zinc-700/20 bg-zinc-950/80 shadow-2xl shadow-black/50 backdrop-blur-sm">
+        <div className="overflow-visible rounded-xl border border-zinc-700/20 bg-zinc-950/80 shadow-2xl shadow-black/50 backdrop-blur-sm">
           <div className="p-4 pb-0">
             <div className="flex gap-1 rounded-lg bg-zinc-900/90 p-1">
               <button
                 type="button"
                 onClick={() => goTab("login")}
-                className={`flex-1 rounded-md py-1.5 text-[0.75rem] font-medium transition-all duration-200 ${
+                className={`flex-1 rounded-md py-1.5 text-base font-medium transition-all duration-200 ${
                   tab === "login"
                     ? "bg-zinc-950/90 text-zinc-100 shadow-sm"
                     : "text-zinc-500 hover:text-zinc-200"
@@ -332,7 +377,7 @@ export function AuthPage() {
               <button
                 type="button"
                 onClick={() => goTab("register")}
-                className={`flex-1 rounded-md py-1.5 text-[0.75rem] font-medium transition-all duration-200 ${
+                className={`flex-1 rounded-md py-1.5 text-base font-medium transition-all duration-200 ${
                   tab === "register"
                     ? "bg-zinc-950/90 text-zinc-100 shadow-sm"
                     : "text-zinc-500 hover:text-zinc-200"
@@ -347,25 +392,29 @@ export function AuthPage() {
             {googleConfigured ? (
               <>
                 <div
-                  className={`relative mb-6 min-h-[44px] w-full ${loading ? "pointer-events-none opacity-60" : ""}`}
+                  className={`relative z-0 mb-6 min-h-[48px] w-full [&_iframe]:!max-w-full ${loading ? "pointer-events-none opacity-60" : ""}`}
                 >
-                  <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center gap-2.5 rounded-lg border border-zinc-600/30 bg-zinc-950/30 py-2 text-sm font-medium text-zinc-200 transition-colors duration-200">
-                    <GoogleMark className="h-[18px] w-[18px] shrink-0" />
-                    <span>{tab === "login" ? "Đăng nhập bằng Google" : "Đăng ký bằng Google"}</span>
+                  <div className="rounded-xl border border-zinc-700/35 bg-zinc-900/45 p-3 shadow-lg shadow-black/25">
+                    <p className="mb-2 text-center text-base font-semibold text-zinc-300">
+                      {tab === "login" ? "Tiếp tục bằng Google" : "Đăng ký nhanh với Google"}
+                    </p>
+                    <div
+                      ref={googleBtnRef}
+                      className="flex min-h-[48px] w-full justify-center rounded-lg bg-zinc-950/40 p-1.5 [&>div]:!w-full"
+                    />
                   </div>
-                  <div ref={googleBtnRef} className="relative z-20 min-h-[44px] w-full opacity-[0.04]" />
                 </div>
                 <div className="relative mb-6">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t border-zinc-700/25" />
                   </div>
-                  <div className="relative flex justify-center text-[0.625rem] font-bold uppercase tracking-widest text-zinc-500">
+                  <div className="relative flex justify-center text-base font-bold uppercase tracking-widest text-zinc-500">
                     <span className="bg-zinc-950/80 px-3 text-zinc-500">Hoặc tiếp tục bằng email</span>
                   </div>
                 </div>
               </>
             ) : (
-              <p className="mb-6 text-center text-xs leading-relaxed text-red-500">
+              <p className="mb-6 text-center text-base leading-relaxed text-red-500">
                 Thêm <code className="font-mono text-red-400">VITE_GOOGLE_CLIENT_ID</code> (web) và{" "}
                 <code className="font-mono text-red-400">GOOGLE_CLIENT_ID</code> (API) trong{" "}
                 <code className="font-mono text-red-400">code/mock-api-data/.env</code>, rồi khởi động lại Vite và API.
@@ -375,7 +424,7 @@ export function AuthPage() {
             {tab === "login" ? (
               <form noValidate onSubmit={onLogin} className="space-y-4">
                 <div className="space-y-1.5">
-                  <label htmlFor="auth-email" className="block text-[0.6875rem] font-bold uppercase tracking-wider text-zinc-500">
+                  <label htmlFor="auth-email" className="block text-base font-bold uppercase tracking-wider text-zinc-500">
                     Địa chỉ email
                   </label>
                   <input
@@ -394,7 +443,7 @@ export function AuthPage() {
                     aria-describedby={
                       tab === "login" && (loginEmailErr || err) ? "auth-login-email-err" : undefined
                     }
-                    className="w-full rounded-lg border border-zinc-600/20 bg-zinc-900/30 px-3 py-2 text-sm text-zinc-100 outline-none transition-all placeholder:text-zinc-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40"
+                    className="w-full rounded-lg border border-zinc-600/20 bg-zinc-900/30 px-3 py-2 text-base text-zinc-100 outline-none transition-all placeholder:text-zinc-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40"
                   />
                   <FieldError
                     id="auth-login-email-err"
@@ -402,7 +451,7 @@ export function AuthPage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label htmlFor="auth-password" className="block text-[0.6875rem] font-bold uppercase tracking-wider text-zinc-500">
+                  <label htmlFor="auth-password" className="block text-base font-bold uppercase tracking-wider text-zinc-500">
                     Mật khẩu
                   </label>
                   <div className="relative">
@@ -421,7 +470,7 @@ export function AuthPage() {
                       aria-describedby={
                         tab === "login" && err && !loginEmailErr ? "auth-login-email-err" : undefined
                       }
-                      className="w-full rounded-lg border border-zinc-600/20 bg-zinc-900/30 py-2 pl-3 pr-10 text-sm text-zinc-100 outline-none transition-all placeholder:text-zinc-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40"
+                      className="w-full rounded-lg border border-zinc-600/20 bg-zinc-900/30 py-2 pl-3 pr-10 text-base text-zinc-100 outline-none transition-all placeholder:text-zinc-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40"
                     />
                     <button
                       type="button"
@@ -435,7 +484,7 @@ export function AuthPage() {
                   <div className="flex justify-end pt-0.5">
                     <button
                       type="button"
-                      className="text-[0.6875rem] font-medium text-violet-400/90 hover:underline"
+                      className="text-base font-medium text-violet-400/90 hover:underline"
                     >
                       Quên mật khẩu?
                     </button>
@@ -444,20 +493,20 @@ export function AuthPage() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="mt-8 w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-600/15 transition-all hover:bg-violet-500 active:scale-[0.98] disabled:opacity-50"
+                  className="mt-8 w-full rounded-lg bg-violet-600 py-2.5 text-base font-semibold text-white shadow-lg shadow-violet-600/15 transition-all hover:bg-violet-500 active:scale-[0.98] disabled:opacity-50"
                 >
                   {loading ? "…" : "Đăng nhập"}
                 </button>
               </form>
             ) : (
               <form noValidate onSubmit={handleRegisterForm} className="space-y-4">
-                <p className="text-center text-[0.625rem] font-medium uppercase tracking-wider text-zinc-500">
+                <p className="text-center text-base font-medium uppercase tracking-wider text-zinc-500">
                   Đăng ký — bước {registerStep}/2
                 </p>
                 {registerStep === 1 ? (
                   <>
                     <div className="space-y-1.5">
-                      <label htmlFor="reg-email" className="block text-[0.6875rem] font-bold uppercase tracking-wider text-zinc-500">
+                      <label htmlFor="reg-email" className="block text-base font-bold uppercase tracking-wider text-zinc-500">
                         Email
                       </label>
                       <input
@@ -466,14 +515,46 @@ export function AuthPage() {
                         autoComplete="email"
                         required
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          setEmail(e.target.value);
+                          setCodeSent(false);
+                        }}
                         aria-invalid={Boolean(registerStep === 1 && err)}
                         aria-describedby={registerStep === 1 && err ? "auth-register-step1-err" : undefined}
-                        className="w-full rounded-lg border border-zinc-600/20 bg-zinc-900/30 px-3 py-2 text-sm text-zinc-100 outline-none transition-all focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40"
+                        className="w-full rounded-lg border border-zinc-600/20 bg-zinc-900/30 px-3 py-2 text-base text-zinc-100 outline-none transition-all focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40"
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label htmlFor="reg-password" className="block text-[0.6875rem] font-bold uppercase tracking-wider text-zinc-500">
+                      <div className="flex items-center justify-between gap-3">
+                        <label htmlFor="reg-code" className="block text-base font-bold uppercase tracking-wider text-zinc-500">
+                          Mã xác thực email
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => void sendVerificationCode()}
+                          disabled={sendingCode}
+                          className="rounded-lg border border-violet-500/45 bg-violet-500/10 px-3 py-1.5 text-base font-semibold text-violet-300 hover:bg-violet-500/20 disabled:opacity-50"
+                        >
+                          {sendingCode ? "Đang gửi..." : codeSent ? "Gửi lại mã" : "Gửi mã"}
+                        </button>
+                      </div>
+                      <input
+                        id="reg-code"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        value={verificationCode}
+                        onChange={(e) => setVerificationCode(e.target.value.replace(/\s+/g, ""))}
+                        placeholder="Nhập mã 6 số"
+                        aria-invalid={Boolean(registerStep === 1 && err)}
+                        aria-describedby={registerStep === 1 && err ? "auth-register-step1-err" : undefined}
+                        className="w-full rounded-lg border border-zinc-600/20 bg-zinc-900/30 px-3 py-2 font-mono text-base tracking-[0.2em] text-zinc-100 outline-none transition-all focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40"
+                      />
+                      <p className="text-base text-zinc-500">
+                        {codeSent ? "Mã đã được gửi. Kiểm tra hộp thư đến (và Spam)." : "Bấm Gửi mã để nhận code qua Gmail."}
+                      </p>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label htmlFor="reg-password" className="block text-base font-bold uppercase tracking-wider text-zinc-500">
                         Mật khẩu
                       </label>
                       <div className="relative">
@@ -489,7 +570,7 @@ export function AuthPage() {
                           placeholder="Tối thiểu 8 ký tự"
                           aria-invalid={Boolean(registerStep === 1 && err)}
                           aria-describedby={registerStep === 1 && err ? "auth-register-step1-err" : undefined}
-                          className="w-full rounded-lg border border-zinc-600/20 bg-zinc-900/30 py-2 pl-3 pr-10 text-sm text-zinc-100 outline-none transition-all placeholder:text-zinc-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40"
+                          className="w-full rounded-lg border border-zinc-600/20 bg-zinc-900/30 py-2 pl-3 pr-10 text-base text-zinc-100 outline-none transition-all placeholder:text-zinc-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500/40"
                         />
                         <button
                           type="button"
@@ -506,18 +587,18 @@ export function AuthPage() {
                       type="button"
                       disabled={loading}
                       onClick={continueRegisterToDisplayStep}
-                      className="mt-2 w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-600/15 transition-all hover:bg-violet-500 active:scale-[0.98] disabled:opacity-50"
+                      className="mt-2 w-full rounded-lg bg-violet-600 py-2.5 text-base font-semibold text-white shadow-lg shadow-violet-600/15 transition-all hover:bg-violet-500 active:scale-[0.98] disabled:opacity-50"
                     >
                       Tiếp tục — chọn tên hiển thị
                     </button>
                   </>
                 ) : (
                   <>
-                    <p className="text-[0.8125rem] leading-relaxed text-zinc-400">
-                      Chọn <strong className="font-medium text-zinc-200">tên hiển thị</strong> và đoạn URL công khai — bước này hoàn tất trước khi tài khoản được tạo và bạn vào DevMock.
+                    <p className="text-base leading-relaxed text-zinc-400">
+                      Chọn <strong className="font-medium text-zinc-200">tên hiển thị</strong> và đoạn URL công khai — bước này hoàn tất trước khi tài khoản được tạo và bạn vào PaperMock.
                     </p>
                     <div className="space-y-1.5">
-                      <label htmlFor="reg-username" className="block text-[0.6875rem] font-bold uppercase tracking-wider text-zinc-500">
+                      <label htmlFor="reg-username" className="block text-base font-bold uppercase tracking-wider text-zinc-500">
                         Tên hiển thị
                       </label>
                       <input
@@ -530,18 +611,18 @@ export function AuthPage() {
                         value={username}
                         onChange={(e) => setUsername(e.target.value.toLowerCase())}
                         placeholder="huynamboz"
-                        className={`w-full rounded-lg border bg-zinc-900/30 px-3 py-2 font-mono text-sm text-zinc-100 outline-none transition-all placeholder:text-zinc-600 focus:ring-1 ${
+                        className={`w-full rounded-lg border bg-zinc-900/30 px-3 py-2 font-mono text-base text-zinc-100 outline-none transition-all placeholder:text-zinc-600 focus:ring-1 ${
                           usernameInvalid
                             ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/25"
                             : "border-zinc-600/20 focus:border-violet-500 focus:ring-violet-500/40"
                         }`}
                       />
-                      <p className="text-[0.6875rem] leading-snug text-zinc-500">
+                      <p className="text-base leading-snug text-zinc-500">
                         Hiển thị trong ứng dụng (menu, trang project). Cùng quy tắc kỹ thuật với tên tài khoản: chữ thường, số, gạch ngang.
                       </p>
                       <FieldError
                         size="compact"
-                        className="text-[0.8125rem]"
+                        className="text-base"
                         message={
                           usernameInvalid
                             ? "Tên hiển thị: 3–32 ký tự, chữ thường, số, gạch ngang (không đầu/cuối bằng gạch)."
@@ -550,7 +631,7 @@ export function AuthPage() {
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <label htmlFor="reg-slug" className="block text-[0.6875rem] font-bold uppercase tracking-wider text-zinc-500">
+                      <label htmlFor="reg-slug" className="block text-base font-bold uppercase tracking-wider text-zinc-500">
                         Tên trong URL (hiển thị công khai)
                       </label>
                       <input
@@ -563,13 +644,13 @@ export function AuthPage() {
                         value={publicSlug}
                         onChange={(e) => setPublicSlug(e.target.value.toLowerCase())}
                         placeholder="acme-team"
-                        className={`w-full rounded-lg border bg-zinc-900/30 px-3 py-2 font-mono text-sm text-zinc-100 outline-none transition-all placeholder:text-zinc-600 focus:ring-1 ${
+                        className={`w-full rounded-lg border bg-zinc-900/30 px-3 py-2 font-mono text-base text-zinc-100 outline-none transition-all placeholder:text-zinc-600 focus:ring-1 ${
                           slugInvalid ? "border-red-500/50 focus:border-red-500 focus:ring-red-500/25" : "border-zinc-600/20 focus:border-violet-500 focus:ring-violet-500/40"
                         }`}
                       />
                       <FieldError
                         size="compact"
-                        className="text-[0.8125rem]"
+                        className="text-base"
                         message={
                           slugInvalid
                             ? "Đoạn URL: 3–32 ký tự, chữ thường, số, gạch ngang (không đầu/cuối bằng gạch)."
@@ -577,7 +658,7 @@ export function AuthPage() {
                         }
                       />
                       <div className="rounded border border-zinc-700/15 bg-black/25 p-2">
-                        <code className="font-mono text-[0.625rem] text-zinc-500">
+                        <code className="font-mono text-base text-zinc-500">
                           /api/
                           <span
                             className={
@@ -599,21 +680,21 @@ export function AuthPage() {
                           setErr(null);
                           setRegisterStep(1);
                         }}
-                        className="w-full rounded-lg border border-zinc-600/30 py-2.5 text-sm font-semibold text-zinc-200 transition-colors hover:bg-zinc-800/40 sm:order-1 sm:w-auto sm:min-w-[7rem]"
+                        className="w-full rounded-lg border border-zinc-600/30 py-2.5 text-base font-semibold text-zinc-200 transition-colors hover:bg-zinc-800/40 sm:order-1 sm:w-auto sm:min-w-[7rem]"
                       >
                         Quay lại
                       </button>
                       <button
                         type="submit"
                         disabled={loading}
-                        className="w-full rounded-lg bg-violet-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-600/15 transition-all hover:bg-violet-500 active:scale-[0.98] disabled:opacity-50 sm:order-2 sm:flex-1"
+                        className="w-full rounded-lg bg-violet-600 py-2.5 text-base font-semibold text-white shadow-lg shadow-violet-600/15 transition-all hover:bg-violet-500 active:scale-[0.98] disabled:opacity-50 sm:order-2 sm:flex-1"
                       >
                         {loading ? "…" : "Tạo tài khoản"}
                       </button>
                     </div>
                   </>
                 )}
-                <p className="mt-4 text-center text-[0.625rem] leading-relaxed text-zinc-500">
+                <p className="mt-4 text-center text-base leading-relaxed text-zinc-500">
                   Khi tạo tài khoản, bạn đồng ý với{" "}
                   <Link to="/docs" className="text-zinc-400 underline hover:text-zinc-200">
                     hướng dẫn sử dụng
@@ -625,8 +706,8 @@ export function AuthPage() {
           </div>
         </div>
 
-        <footer className="mt-12 flex flex-col items-center justify-between gap-3 px-2 text-[10px] font-medium uppercase tracking-widest text-zinc-600 sm:flex-row">
-          <p>© {new Date().getFullYear()} DevMock</p>
+        <footer className="mt-12 flex flex-col items-center justify-between gap-3 px-2 text-base font-medium uppercase tracking-widest text-zinc-600 sm:flex-row">
+          <p>© {new Date().getFullYear()} PaperMock</p>
           <div className="flex gap-4">
             <Link to="/docs" className="hover:text-zinc-400">
               Docs
@@ -638,6 +719,7 @@ export function AuthPage() {
         </footer>
         </div>
       </div>
+      <BlockingLoadingOverlay open={loading} message={loadingMessage} />
     </div>
   );
 }

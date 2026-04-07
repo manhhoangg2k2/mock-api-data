@@ -323,7 +323,7 @@ export const MenuSelect = forwardRef<HTMLButtonElement, MenuSelectProps>(functio
                   <div key={`${o.groupLabel ?? ""}-${o.value}-${idx}`}>
                     {showGroup ? (
                       <div
-                        className="sticky top-0 z-[1] border-b border-zinc-800/80 bg-zinc-950/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-zinc-500 backdrop-blur-sm"
+                        className="sticky top-0 z-[1] border-b border-zinc-800/80 bg-zinc-950/95 px-3 py-1.5 text-base font-semibold uppercase tracking-wider text-zinc-500 backdrop-blur-sm"
                         role="presentation"
                       >
                         {o.groupLabel}
@@ -335,7 +335,7 @@ export const MenuSelect = forwardRef<HTMLButtonElement, MenuSelectProps>(functio
                       data-idx={idx}
                       aria-selected={selected}
                       title={o.title}
-                      className={`mx-1 cursor-pointer rounded-lg px-2.5 py-2 text-left text-sm transition-colors ${
+                      className={`mx-1 cursor-pointer rounded-lg px-2.5 py-2 text-left text-base transition-colors ${
                         o.disabled
                           ? "cursor-not-allowed opacity-40"
                           : active

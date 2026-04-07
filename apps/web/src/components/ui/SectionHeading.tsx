@@ -17,8 +17,8 @@ export function SectionHeading({ icon, title, subtitle, info, className = "" }: 
           {icon}
         </span>
         <div className="min-w-0 pt-0.5">
-          <h3 className="text-sm font-medium tracking-tight text-zinc-100">{title}</h3>
-          {subtitle ? <p className="mt-1 max-w-xl text-[11px] leading-snug text-zinc-500">{subtitle}</p> : null}
+          <h3 className="text-base font-medium tracking-tight text-zinc-100">{title}</h3>
+          {subtitle ? <p className="mt-1 max-w-xl text-base leading-snug text-zinc-500">{subtitle}</p> : null}
         </div>
       </div>
       {info ? <InfoPopover label={`Chi tiết: ${title}`}>{info}</InfoPopover> : null}

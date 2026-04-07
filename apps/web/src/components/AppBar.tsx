@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { dm } from "@/lib/ui/dm-ui";
 
 function navLinkClass(active: boolean) {
-  return `rounded-lg px-3 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
+  return `rounded-lg px-3 py-2 text-base font-medium transition-colors whitespace-nowrap ${
     active ? "bg-zinc-900 text-violet-400" : "text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-100"
   }`;
 }
@@ -50,7 +50,7 @@ function UserMenu() {
               setOpen(false);
               logout();
             }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-zinc-300 transition hover:bg-zinc-800 hover:text-zinc-50"
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-base text-zinc-300 transition hover:bg-zinc-800 hover:text-zinc-50"
           >
             <LogOut className="h-4 w-4 shrink-0 text-zinc-500" aria-hidden />
             Đăng xuất
@@ -66,12 +66,12 @@ function UserMenu() {
         aria-haspopup="menu"
       >
         <div
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-xs font-semibold text-violet-300 ring-1 ring-violet-500/25"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-base font-semibold text-violet-300 ring-1 ring-violet-500/25"
           aria-hidden
         >
           {initial}
         </div>
-        <span className="min-w-0 flex-1 truncate font-mono text-sm text-zinc-300">@{handle}</span>
+        <span className="min-w-0 flex-1 truncate font-mono text-base text-zinc-300">@{handle}</span>
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-zinc-500 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden
@@ -105,8 +105,8 @@ export function AppBar({ variant = "public" }: AppBarProps) {
         }
       >
         <div className="flex min-w-0 items-center justify-self-start">
-          <Link to="/" className="shrink-0 text-lg font-bold tracking-tight text-zinc-100">
-            Dev<span className="text-violet-500">M</span>ock
+          <Link to="/" className="shrink-0 text-xl font-bold tracking-tight text-zinc-100">
+            Paper<span className="text-violet-500">M</span>ock
           </Link>
         </div>
 

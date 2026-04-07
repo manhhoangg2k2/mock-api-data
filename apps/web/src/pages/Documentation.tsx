@@ -5,7 +5,7 @@ import { dm } from "@/lib/ui/dm-ui";
 
 function Code({ children }: { children: string }) {
   return (
-    <code className="block overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-xs leading-relaxed text-zinc-300">
+    <code className="block overflow-x-auto rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2.5 font-mono text-base leading-relaxed text-zinc-300">
       {children}
     </code>
   );
@@ -14,7 +14,7 @@ function Code({ children }: { children: string }) {
 function VisualDemo({ title, children }: { title: string; children: ReactNode }) {
   return (
     <figure className="overflow-hidden rounded-xl border border-violet-500/25 bg-gradient-to-br from-violet-950/20 to-zinc-900/40 p-4 sm:p-5">
-      <figcaption className="mb-3 text-xs font-semibold uppercase tracking-wide text-violet-300/90">{title}</figcaption>
+      <figcaption className="mb-3 text-base font-semibold uppercase tracking-wide text-violet-300/90">{title}</figcaption>
       {children}
     </figure>
   );
@@ -34,10 +34,10 @@ function Section({
   return (
     <section id={id} className="scroll-mt-28 border-t border-zinc-800/60 pt-12 first:border-t-0 first:pt-0">
       {kicker ? (
-        <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-violet-400/90">{kicker}</p>
+        <p className="mb-1 text-base font-semibold uppercase tracking-widest text-violet-400/90">{kicker}</p>
       ) : null}
       <h2 className="text-xl font-semibold tracking-tight text-zinc-50 sm:text-2xl">{title}</h2>
-      <div className="mt-4 space-y-4 text-sm leading-relaxed text-zinc-400">{children}</div>
+      <div className="mt-4 space-y-4 text-base leading-relaxed text-zinc-400">{children}</div>
     </section>
   );
 }
@@ -46,7 +46,7 @@ function TocLink({ to, children }: { to: string; children: ReactNode }) {
   return (
     <a
       href={to}
-      className="group flex items-start gap-1.5 rounded-md py-1 text-left text-sm text-zinc-400 transition hover:bg-zinc-800/50 hover:text-zinc-100"
+      className="group flex items-start gap-1.5 rounded-md py-1 text-left text-base text-zinc-400 transition hover:bg-zinc-800/50 hover:text-zinc-100"
     >
       <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-zinc-600 group-hover:text-violet-400" aria-hidden />
       <span>{children}</span>
@@ -81,7 +81,7 @@ export function Documentation() {
           aria-label="Mục lục hướng dẫn"
           className="mb-10 rounded-xl border border-zinc-800 bg-zinc-900/40 p-4 lg:sticky lg:top-24 lg:mb-0"
         >
-          <p className="mb-3 text-[0.65rem] font-bold uppercase tracking-[0.15em] text-zinc-500">Trên trang này</p>
+          <p className="mb-3 text-base font-bold uppercase tracking-[0.15em] text-zinc-500">Trên trang này</p>
           <ul className="space-y-1">
             {toc.map((item) => (
               <li key={item.href}>
@@ -101,7 +101,7 @@ export function Documentation() {
           <div className="mt-5 border-t border-zinc-800 pt-4">
             <Link
               to={{ pathname: "/", hash: "guest-generator" }}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-violet-400 hover:text-violet-300 hover:underline"
+              className="inline-flex items-center gap-1.5 text-base font-medium text-violet-400 hover:text-violet-300 hover:underline"
             >
               Mở Guest trên trang chủ
               <ExternalLink className="h-3.5 w-3.5 opacity-80" aria-hidden />
@@ -111,19 +111,19 @@ export function Documentation() {
 
         <article className="min-w-0 space-y-0">
           <header id="gioi-thieu" className="scroll-mt-28 space-y-4 pb-10">
-            <p className="text-xs font-semibold uppercase tracking-widest text-violet-400">Tài liệu</p>
-            <h1 className="text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">Hướng dẫn sử dụng DevMock</h1>
+            <p className="text-base font-semibold uppercase tracking-widest text-violet-400">Tài liệu</p>
+            <h1 className="text-3xl font-bold tracking-tight text-zinc-50 sm:text-4xl">Hướng dẫn sử dụng PaperMock</h1>
             <p className="max-w-2xl text-base text-zinc-400">
-              Trang này giải thích cách dùng DevMock bằng tiếng Việt đơn giản. Phần{" "}
+              Trang này giải thích cách dùng PaperMock bằng tiếng Việt đơn giản. Phần{" "}
               <strong className="font-medium text-zinc-200">quan trọng nhất</strong> là hướng dẫn chi tiết cho người{" "}
               <strong className="font-medium text-zinc-200">chưa đăng nhập</strong> — tạo API giả (mock) công khai trong vài phút, không cần tài
               khoản.
             </p>
             <div className="flex flex-wrap gap-2">
-              <Link to={{ pathname: "/", hash: "guest-generator" }} className={dm.btn.primary + " !px-4 !py-2 text-xs"}>
+              <Link to={{ pathname: "/", hash: "guest-generator" }} className={dm.btn.primary + " !px-4 !py-2 text-base"}>
                 Thử Guest ngay trên trang chủ
               </Link>
-              <Link to="/register" className={dm.btn.outline + " !px-4 !py-2 text-xs"}>
+              <Link to="/register" className={dm.btn.outline + " !px-4 !py-2 text-base"}>
                 Đăng ký khi cần lưu lâu dài
               </Link>
             </div>
@@ -159,7 +159,7 @@ export function Documentation() {
 
             <VisualDemo title="Minh họa bố cục (trái = cấu hình · phải = xem trước)">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
-                <div className="flex-1 rounded-lg border border-dashed border-zinc-600 bg-zinc-950/60 p-3 text-center text-[11px] text-zinc-500">
+                <div className="flex-1 rounded-lg border border-dashed border-zinc-600 bg-zinc-950/60 p-3 text-center text-base text-zinc-500">
                   <p className="mb-2 font-medium text-zinc-400">Cột trái</p>
                   <p className="font-mono text-violet-300/90">Resource path</p>
                   <p className="mt-1 text-zinc-600">Loại response · Quantity</p>
@@ -169,11 +169,11 @@ export function Documentation() {
                 <div className="hidden shrink-0 items-center justify-center text-zinc-600 sm:flex" aria-hidden>
                   →
                 </div>
-                <div className="flex-1 rounded-lg border border-dashed border-zinc-600 bg-zinc-950/60 p-3 text-center text-[11px] text-zinc-500">
+                <div className="flex-1 rounded-lg border border-dashed border-zinc-600 bg-zinc-950/60 p-3 text-center text-base text-zinc-500">
                   <p className="mb-2 font-medium text-zinc-400">Cột phải</p>
                   <p className="font-mono text-emerald-400/90">Live preview</p>
                   <p className="mt-1 text-zinc-600">JSON mẫu · nút Reroll</p>
-                  <p className="mt-3 rounded bg-zinc-900/80 p-2 text-left font-mono text-[10px] text-zinc-500">{"{ … }"}</p>
+                  <p className="mt-3 rounded bg-zinc-900/80 p-2 text-left font-mono text-base text-zinc-500">{"{ … }"}</p>
                 </div>
               </div>
             </VisualDemo>
@@ -184,7 +184,7 @@ export function Documentation() {
               <li>
                 <strong className="text-zinc-200">Điền Resource path</strong> — đường dẫn “giả” của API, <strong className="text-zinc-200">không</strong>{" "}
                 gõ <code className="rounded bg-zinc-900 px-1 font-mono text-zinc-300">/</code> ở đầu. Ví dụ: <code className="font-mono text-zinc-300">v1/users</code>.
-                <p className="mt-2 text-xs text-zinc-500">
+                <p className="mt-2 text-base text-zinc-500">
                   Dưới ô nhập có dòng gợi ý dạng <code className="font-mono text-zinc-400">/api/guest/&lt;token&gt;/…</code> — sau khi bạn release,{" "}
                   <code className="font-mono text-zinc-400">&lt;token&gt;</code> là mã ngẫu nhiên; phần sau cùng chính là path bạn nhập.
                 </p>
@@ -221,9 +221,9 @@ export function Documentation() {
 
           <Section id="tung-o-nghia" title="Tóm tắt nhanh: từng ô nghĩa là gì?">
             <div className="overflow-x-auto rounded-lg border border-zinc-800">
-              <table className="w-full min-w-[520px] border-collapse text-left text-sm">
+              <table className="w-full min-w-[520px] border-collapse text-left text-base">
                 <thead>
-                  <tr className="border-b border-zinc-800 bg-zinc-900/60 text-xs uppercase tracking-wide text-zinc-500">
+                  <tr className="border-b border-zinc-800 bg-zinc-900/60 text-base uppercase tracking-wide text-zinc-500">
                     <th className="px-3 py-2 font-medium">Phần trên màn hình</th>
                     <th className="px-3 py-2 font-medium">Việc bạn cần biết</th>
                   </tr>
@@ -262,13 +262,13 @@ export function Documentation() {
               Sau khi release thành công, bạn nhận URL dạng (đây chỉ là <strong className="text-zinc-200">mẫu</strong>, token thật sẽ dài và khác mỗi lần):
             </p>
             <Code>{`GET https://<máy-chủ-của-bạn>/api/guest/abc123xyz.../v1/users`}</Code>
-            <p className="text-xs text-zinc-500">
+            <p className="text-base text-zinc-500">
               Thay <code className="font-mono text-zinc-400">&lt;máy-chủ-của-bạn&gt;</code> bằng domain hoặc localhost + cổng API mà tài liệu triển khai của
               bạn quy định (ví dụ chạy local thường là cổng API <code className="font-mono text-zinc-400">3000</code>).
             </p>
 
             <VisualDemo title="Minh họa: path trong form → đoạn cuối URL">
-              <div className="space-y-3 font-mono text-xs">
+              <div className="space-y-3 font-mono text-base">
                 <div className="rounded-lg bg-zinc-950 px-3 py-2 text-zinc-400">
                   <span className="text-zinc-600">Bạn gõ Resource path:</span>{" "}
                   <span className="text-violet-300">v1/users</span>
@@ -336,7 +336,7 @@ export function Documentation() {
               → tạo project → trong project tạo / sửa endpoint (path, method, field schema, v.v.). URL công khai kiểu:
             </p>
             <Code>{`GET https://<host>/api/<username-hoặc-public-slug>/<resource-path>`}</Code>
-            <p className="text-xs text-zinc-500">
+            <p className="text-base text-zinc-500">
               Chi tiết field trong form builder có thêm tour hướng dẫn trên giao diện chỉnh endpoint.
             </p>
           </Section>
@@ -344,7 +344,7 @@ export function Documentation() {
           <Section id="developer" kicker="Developer" title="Gợi ý thêm khi tích hợp / chạy local">
             <ul className="list-disc space-y-2 pl-5">
               <li>
-                Phản hồi mock có thể kèm header kiểu <code className="font-mono text-zinc-400">X-DevMock-Chaos</code> để biết trường nào bị lệch so với
+                Phản hồi mock có thể kèm header kiểu <code className="font-mono text-zinc-400">X-PaperMock-Chaos</code> để biết trường nào bị lệch so với
                 “đường vui” — hữu ích khi debug.
               </li>
               <li>
@@ -356,9 +356,9 @@ export function Documentation() {
           </Section>
 
           <div className="mt-14 rounded-xl border border-zinc-800/80 bg-zinc-900/30 p-5">
-            <p className="text-sm text-zinc-400">
+            <p className="text-base text-zinc-400">
               Quay lại thử Guest trên trang chủ?{" "}
-              <Link to={{ pathname: "/", hash: "guest-generator" }} className={dm.btn.outline + " ml-2 inline-flex items-center gap-1 !py-2 !px-4 text-xs"}>
+              <Link to={{ pathname: "/", hash: "guest-generator" }} className={dm.btn.outline + " ml-2 inline-flex items-center gap-1 !py-2 !px-4 text-base"}>
                 Mở Guest Generator
                 <ExternalLink className="h-3.5 w-3.5" aria-hidden />
               </Link>

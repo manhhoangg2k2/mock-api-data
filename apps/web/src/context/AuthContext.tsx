@@ -26,7 +26,13 @@ type AuthState = {
   token: string | null;
   ready: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (username: string, publicSlug: string, email: string, password: string) => Promise<void>;
+  register: (
+    username: string,
+    publicSlug: string,
+    email: string,
+    password: string,
+    verificationCode: string
+  ) => Promise<void>;
   loginWithGoogle: (credential: string) => Promise<void>;
   logout: () => void;
   refreshMe: () => Promise<void>;
@@ -95,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const res = await apiFetch<{ user: AuthUser }>("/v1/auth/me");
       setUser(res.user);
-      localStorage.setItem("devmock_user", JSON.stringify(res.user));
+      localStorage.setItem("PaperMock_user", JSON.stringify(res.user));
     } catch {
       logout();
     }
@@ -113,10 +119,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const register = useCallback(
-    async (username: string, publicSlug: string, email: string, password: string) => {
+    async (
+      username: string,
+      publicSlug: string,
+      email: string,
+      password: string,
+      verificationCode: string
+    ) => {
       const res = await apiFetch<{ token: string; refreshToken?: string; user: AuthUser }>("/v1/auth/register", {
         method: "POST",
-        json: { username, publicSlug, email, password },
+        json: { username, publicSlug, email, password, verificationCode },
       });
       setSession(res.token, res.user, res.refreshToken);
       setToken(res.token);

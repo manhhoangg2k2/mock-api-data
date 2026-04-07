@@ -13,9 +13,9 @@ export function InlineLegendLabel({
 }) {
   return (
     <div className={`flex min-h-5 items-center gap-2 ${className}`.trim()}>
-      <span className="font-semibold leading-none text-zinc-300 text-[11px]">{label}</span>
+      <span className="font-semibold leading-none text-zinc-300 text-base">{label}</span>
       <span
-        className="inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-950/40 text-[10px] font-medium leading-none text-zinc-400"
+        className="inline-flex size-5 shrink-0 items-center justify-center rounded-full border border-zinc-800 bg-zinc-950/40 text-base font-medium leading-none text-zinc-400"
         title={hintTitle}
         aria-label={hintAriaLabel}
       >

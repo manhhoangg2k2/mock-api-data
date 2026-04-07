@@ -33,18 +33,18 @@ export function LandingVisualTool() {
     <div className="mt-20 w-full relative group">
       <div className="absolute -inset-1 bg-gradient-to-r from-violet-500/20 to-rose-500/20 rounded-xl blur-2xl opacity-25 group-hover:opacity-40 transition duration-1000" />
       <div
-        className="relative bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-2 aspect-[16/6] overflow-hidden"
+        className="relative h-[340px] sm:h-[380px] md:h-[420px] bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-2 overflow-auto md:overflow-hidden"
         aria-label="Visual abstraction của mock API"
       >
-        <div className="bg-zinc-950/20 h-full rounded-lg flex overflow-hidden">
+        <div className="bg-zinc-950/20 h-full min-w-[760px] rounded-lg flex overflow-hidden">
           <FeatureIconRow />
 
-          <div className="flex-1 p-6 font-mono text-[0.82rem] text-zinc-400 leading-relaxed overflow-hidden">
+          <div className="flex-1 p-6 font-mono text-base text-zinc-400 leading-relaxed overflow-auto">
             <div className="flex items-center gap-2 mb-3">
-              <span className="inline-flex items-center rounded-md border border-zinc-800/70 bg-zinc-950/40 px-2 py-0.5 text-[0.72rem] text-violet-300">
-                devmock
+              <span className="inline-flex items-center rounded-md border border-zinc-800/70 bg-zinc-950/40 px-2 py-0.5 text-base text-violet-300">
+                PaperMock
               </span>
-              <span className="text-[0.72rem] text-zinc-500">preview</span>
+              <span className="text-base text-zinc-500">preview</span>
             </div>
 
             <div className="whitespace-pre-wrap">
@@ -74,7 +74,7 @@ export function LandingVisualTool() {
               <span className="text-violet-400">{"}"}</span>
             </div>
 
-            <div className="mt-5 flex items-center justify-between text-[0.72rem] text-zinc-500">
+            <div className="mt-5 flex items-center justify-between text-base text-zinc-500">
               <span>Dữ liệu chuẩn + tô sáng trường hợp lỗi</span>
               <span className="text-violet-300"># dễ nhìn lỗi</span>
             </div>

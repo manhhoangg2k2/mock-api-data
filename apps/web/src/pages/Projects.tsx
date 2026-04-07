@@ -42,12 +42,12 @@ function ProjectCard({
     >
       <div className="min-h-0 flex-1">
         <h2 className="text-lg font-semibold text-zinc-50 transition-colors group-hover:text-violet-300">{name}</h2>
-        <p className="mt-1.5 truncate font-mono text-sm text-zinc-500">{slug}</p>
+        <p className="mt-1.5 truncate font-mono text-base text-zinc-500">{slug}</p>
         {description ? (
-          <p className="mt-2 line-clamp-2 text-sm leading-snug text-zinc-500">{description}</p>
+          <p className="mt-2 line-clamp-2 text-base leading-snug text-zinc-500">{description}</p>
         ) : null}
       </div>
-      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-zinc-800/80 pt-4 text-xs text-zinc-400">
+      <div className="mt-5 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-zinc-800/80 pt-4 text-base text-zinc-400">
         <span className="inline-flex items-center gap-1.5">
           <Radio className="h-3.5 w-3.5 shrink-0 text-zinc-500" aria-hidden />
           <span>{endpointLabel}</span>
@@ -128,11 +128,11 @@ export function Projects() {
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 flex-1 space-y-2">
           <h1 className="text-3xl font-bold tracking-tight text-zinc-50">My Projects</h1>
-          <div className="max-w-2xl space-y-1.5 text-sm leading-relaxed text-zinc-400">
+          <div className="max-w-2xl space-y-1.5 text-base leading-relaxed text-zinc-400">
             <p>
               <span className="font-mono text-zinc-300">@{user?.username ?? "—"}</span>
               {" · "}mock công khai{" "}
-              <code className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-px font-mono text-[0.8125rem] text-zinc-300">
+              <code className="rounded border border-zinc-800 bg-zinc-900 px-1.5 py-px font-mono text-base text-zinc-300">
                 /api/{publicSlug || "…"}/…
               </code>
             </p>
@@ -144,7 +144,7 @@ export function Projects() {
         <button
           type="button"
           onClick={() => setDialogOpen(true)}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-violet-500 px-4 py-2.5 text-sm font-medium text-white shadow-md shadow-violet-500/20 transition hover:bg-violet-600 active:scale-[0.98]"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-violet-500 px-4 py-2.5 text-base font-medium text-white shadow-md shadow-violet-500/20 transition hover:bg-violet-600 active:scale-[0.98]"
         >
           + New Project
         </button>
@@ -155,7 +155,7 @@ export function Projects() {
       {err && !loading ? (
         <FieldError
           message={err}
-          className="rounded-lg border border-rose-500/30 bg-rose-950/40 px-4 py-2 text-sm !text-rose-200"
+          className="rounded-lg border border-rose-500/30 bg-rose-950/40 px-4 py-2 text-base !text-rose-200"
         />
       ) : null}
 
@@ -164,8 +164,8 @@ export function Projects() {
       ) : list.length === 0 ? (
         <div className="rounded-xl border border-dashed border-zinc-800 bg-zinc-900/50 px-6 py-16 text-center">
           <Box className="mx-auto h-10 w-10 text-zinc-600" aria-hidden />
-          <p className="mt-3 text-sm font-medium text-zinc-400">Chưa có project</p>
-          <p className="mt-1 text-xs text-zinc-500">Bấm &quot;+ New Project&quot; để tạo dự án đầu tiên.</p>
+          <p className="mt-3 text-base font-medium text-zinc-400">Chưa có project</p>
+          <p className="mt-1 text-base text-zinc-500">Bấm &quot;+ New Project&quot; để tạo dự án đầu tiên.</p>
         </div>
       ) : (
         <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

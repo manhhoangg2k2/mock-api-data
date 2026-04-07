@@ -43,7 +43,9 @@ export function ProjectDetail() {
       const eps = await apiFetch<EndpointRow[]>(`/v1/projects/${projectId}/endpoints`);
       setEndpoints(eps);
       try {
-        const q = await apiFetch<{ endpoints: EndpointQuotas }>("/v1/me/quotas");
+        const q = await apiFetch<{ endpoints: EndpointQuotas }>(
+          `/v1/me/quotas?projectId=${encodeURIComponent(projectId)}`
+        );
         setEndpointQuotas(q.endpoints);
       } catch {
         setEndpointQuotas(null);
@@ -101,7 +103,7 @@ export function ProjectDetail() {
     );
   }
   if (!project || !projectId) {
-    return <FieldError message={err ?? "Không tìm thấy project."} className="text-sm" />;
+    return <FieldError message={err ?? "Không tìm thấy project."} className="text-base" />;
   }
 
   const initial = project.name.trim().charAt(0).toUpperCase() || "P";
@@ -112,7 +114,7 @@ export function ProjectDetail() {
   return (
     <div className="space-y-8">
       <div>
-        <Link to="/projects" className="text-sm text-violet-400/90 hover:underline">
+        <Link to="/projects" className="text-base text-violet-400/90 hover:underline">
           ← Dự án
         </Link>
       </div>
@@ -127,14 +129,14 @@ export function ProjectDetail() {
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">{project.name}</h1>
-                <span className="inline-flex items-center gap-1 rounded-full border border-zinc-800 bg-zinc-900/80 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-zinc-500">
+                <span className="inline-flex items-center gap-1 rounded-full border border-zinc-800 bg-zinc-900/80 px-2.5 py-0.5 text-base font-medium uppercase tracking-wide text-zinc-500">
                   <FolderGit2 size={12} className="opacity-70" aria-hidden />
                   Workspace
                 </span>
               </div>
-              <p className="mt-2 text-sm text-zinc-400">
+              <p className="mt-2 text-base text-zinc-400">
                 Định danh public:{" "}
-                <code className="rounded-md border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 font-mono text-xs text-violet-300/90">
+                <code className="rounded-md border border-zinc-800 bg-zinc-900 px-1.5 py-0.5 font-mono text-base text-violet-300/90">
                   {project.slug}
                 </code>
               </p>
@@ -143,7 +145,7 @@ export function ProjectDetail() {
           <button
             type="button"
             onClick={scrollToCreateEndpoint}
-            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-500 active:scale-[0.98] sm:self-start"
+            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-violet-600 px-4 py-2.5 text-base font-semibold text-white shadow-lg shadow-violet-600/25 transition hover:bg-violet-500 active:scale-[0.98] sm:self-start"
           >
             Tạo Endpoint
           </button>
@@ -153,16 +155,16 @@ export function ProjectDetail() {
       {err ? (
         <FieldError
           message={err}
-          className="rounded-lg border border-rose-500/30 bg-rose-950/40 px-4 py-2 text-sm !text-rose-200"
+          className="rounded-lg border border-rose-500/30 bg-rose-950/40 px-4 py-2 text-base !text-rose-200"
         />
       ) : null}
 
       <section className="space-y-4">
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-500">API Endpoints</h2>
+          <h2 className="text-base font-semibold uppercase tracking-wide text-zinc-500">API Endpoints</h2>
           {endpointQuotas ? (
-            <p className="text-xs leading-relaxed text-zinc-400">
-              Hạn mức toàn tài khoản:{" "}
+            <p className="text-base leading-relaxed text-zinc-400">
+              Hạn mức project này:{" "}
               <span className="font-semibold tabular-nums text-zinc-200">
                 {endpointQuotas.used}/{endpointQuotas.max}
               </span>{" "}
@@ -181,7 +183,7 @@ export function ProjectDetail() {
           ) : null}
         </div>
         {endpoints.length === 0 ? (
-          <p className="text-sm text-zinc-500">Chưa có endpoint. Dùng nút &quot;Tạo Endpoint&quot; phía trên.</p>
+          <p className="text-base text-zinc-500">Chưa có endpoint. Dùng nút &quot;Tạo Endpoint&quot; phía trên.</p>
         ) : (
           <EndpointsTable
             projectId={projectId}

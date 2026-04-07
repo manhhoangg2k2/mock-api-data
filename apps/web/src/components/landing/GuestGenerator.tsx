@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Info, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { apiFetch, ApiError } from "@/lib/api";
 import type { SchemaHints } from "@/components/endpoint/constants";
@@ -21,7 +21,9 @@ import { useToast } from "@/context/ToastContext";
 import { InlineLegendLabel } from "@/components/ui/InlineLegendLabel";
 import { FieldError } from "@/components/ui/field-error";
 import { NativeSelect } from "@/components/ui/NativeSelect";
+import { StepperInput } from "@/components/ui/StepperInput";
 import { Switch } from "@/components/ui/Switch";
+import { LoadingSpinner } from "@/components/ui/AppLoadingScreen";
 
 type ChaosCaseId = 1 | 2;
 
@@ -124,20 +126,60 @@ function happyValueForType(type: FieldFormRow["type"], seed: number): unknown {
       return `192.168.0.${Math.floor(seededRand(seed) * 255)}`;
     case "color":
       return "#38bdf8";
+    case "array":
+      return [`item_${Math.floor(seededRand(seed) * 100)}`, `item_${Math.floor(seededRand(seed + 1) * 100)}`];
+    case "object":
+      return {
+        id: `obj_${Math.floor(seededRand(seed) * 1000)}`,
+        ok: seededRand(seed + 1) > 0.5,
+      };
+    case "paragraph":
+      return "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
+    case "slug":
+      return `item-${Math.floor(seededRand(seed) * 900 + 100)}`;
     default:
       return `str_${seed}`;
   }
 }
 
-function generateRecordPreview(fields: FieldFormRow[], seed: number) {
+function happyValueForFaker(faker: string, seed: number): unknown | undefined {
+  switch (faker) {
+    case "uuid":
+      return seededUuid(seed);
+    case "fullName": {
+      const names = ["Nguyen An", "Tran Binh", "Le Chi", "Pham Dung", "Alex Rivera"];
+      return names[Math.floor(seededRand(seed) * names.length)] ?? names[0];
+    }
+    case "email":
+      return `user${Math.floor(seededRand(seed) * 9999)}@example.com`;
+    case "financeAmount":
+      return Number((seededRand(seed) * 10000).toFixed(2));
+    case "phone":
+      return `09${Math.floor(seededRand(seed) * 90000000 + 10000000)}`;
+    case "country": {
+      const countries = ["Viet Nam", "Singapore", "Japan", "United States"];
+      return countries[Math.floor(seededRand(seed) * countries.length)] ?? countries[0];
+    }
+    case "city": {
+      const cities = ["Ha Noi", "Ho Chi Minh", "Da Nang", "Can Tho"];
+      return cities[Math.floor(seededRand(seed) * cities.length)] ?? cities[0];
+    }
+    case "boolean":
+      return seededRand(seed) > 0.5;
+    default:
+      return undefined;
+  }
+}
+
+function generateRecordPreview(fields: FieldFormRow[], seed: number, forceChaos = false) {
   const out: Record<string, unknown> = {};
   for (let i = 0; i < fields.length; i++) {
     const f = fields[i]!;
     if (!f.key.trim()) continue;
 
-    const omit = f.omitPercent > 0;
-    const nul = f.nullPercent > 0;
-    const edge = f.edgePercent > 0;
+    const omit = forceChaos && f.omitPercent > 0;
+    const nul = forceChaos && f.nullPercent > 0;
+    const edge = forceChaos && f.edgePercent > 0;
 
     if (omit) continue;
     if (nul) {
@@ -149,7 +191,8 @@ function generateRecordPreview(fields: FieldFormRow[], seed: number) {
       continue;
     }
 
-    out[f.key] = happyValueForType(f.type, seed + i * 17);
+    const byFaker = f.faker ? happyValueForFaker(f.faker, seed + i * 17) : undefined;
+    out[f.key] = byFaker !== undefined ? byFaker : happyValueForType(f.type, seed + i * 17);
   }
   return out;
 }
@@ -166,7 +209,7 @@ function JsonPreview({ value, chaosCase, chaosFieldKey }: { value: unknown; chao
   const raw = JSON.stringify(value, null, 2);
   const lines = raw.split("\n");
   return (
-    <pre className="m-0 overflow-x-auto p-4 font-mono text-sm leading-relaxed text-zinc-300">
+    <pre className="m-0 overflow-x-auto p-4 font-mono text-base leading-relaxed text-zinc-300">
       <code>
         {lines.map((line, i) => {
           const bad = highlightChaosLine(line, chaosCase, chaosFieldKey);
@@ -200,6 +243,8 @@ export function GuestGenerator() {
   );
 
   const [rerollSeed, setRerollSeed] = useState(0);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const previewTimerRef = useRef<number | null>(null);
 
   const methods = useMemo(() => new Set<string>(["GET"]), []);
 
@@ -207,21 +252,43 @@ export function GuestGenerator() {
     const q = Math.min(GUEST_MAX_ITEMS, Math.max(1, Math.floor(quantity || 1)));
     const seed = 1000 + rerollSeed;
     const count = responsePreset === "single_object" ? 1 : q;
+    const chaosIndex = chaosEnabled ? Math.min(count - 1, Math.floor(seededRand(seed + 7) * count)) : -1;
 
     if (responsePreset === "single_object") {
-      return generateRecordPreview(fields, seed);
+      return generateRecordPreview(fields, seed, chaosEnabled);
     }
 
     if (responsePreset === "array_list") {
-      return Array.from({ length: count }, (_, i) => generateRecordPreview(fields, seed + i * 101));
+      return Array.from({ length: count }, (_, i) =>
+        generateRecordPreview(fields, seed + i * 101, i === chaosIndex)
+      );
     }
 
-    const items = Array.from({ length: count }, (_, i) => generateRecordPreview(fields, seed + i * 101));
+    const items = Array.from({ length: count }, (_, i) =>
+      generateRecordPreview(fields, seed + i * 101, i === chaosIndex)
+    );
     return {
       data: items,
       meta: { page: 1, limit: q, total: 1_000_000 },
     };
-  }, [fields, chaosCase, quantity, responsePreset, rerollSeed]);
+  }, [fields, chaosEnabled, quantity, responsePreset, rerollSeed]);
+
+  useEffect(() => {
+    setPreviewLoading(true);
+    if (previewTimerRef.current !== null) {
+      window.clearTimeout(previewTimerRef.current);
+    }
+    previewTimerRef.current = window.setTimeout(() => {
+      setPreviewLoading(false);
+      previewTimerRef.current = null;
+    }, 260);
+    return () => {
+      if (previewTimerRef.current !== null) {
+        window.clearTimeout(previewTimerRef.current);
+        previewTimerRef.current = null;
+      }
+    };
+  }, [fields, quantity, responsePreset, rerollSeed, chaosEnabled, chaosCase]);
 
   const chaosFieldId = chaosEnabled ? pickChaosFieldId(fields) : null;
   const chaosFieldKey = chaosFieldId
@@ -392,9 +459,9 @@ export function GuestGenerator() {
           </h2>
           <div
             role="status"
-            className="mx-auto mt-6 max-w-2xl rounded-lg border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-left text-xs text-amber-100/85"
+            className="mx-auto mt-6 max-w-2xl rounded-lg border border-amber-500/30 bg-amber-950/20 px-3 py-2 text-left text-base text-amber-100/85"
           >
-            <span className="text-[0.7rem] font-semibold uppercase tracking-wide text-amber-200/95">⚠️ Guest API</span>
+            <span className="text-base font-semibold uppercase tracking-wide text-amber-200/95">⚠️ Guest API</span>
             <p className="mt-1 leading-snug text-amber-100/75">
               API guest <strong className="text-amber-100">tồn tại ~30 phút</strong> và có giới hạn:{" "}
               <strong className="text-amber-100">tối đa 10 fields</strong> và <strong className="text-amber-100">tối đa 10 records</strong>.
@@ -405,28 +472,28 @@ export function GuestGenerator() {
 
         <div className="mt-10 space-y-6 rounded-2xl border border-zinc-800/80 bg-zinc-900/20 p-4 sm:p-6">
           <div className="flex flex-col gap-8 lg:flex-row lg:items-stretch lg:gap-10">
-            <div className="flex flex-1 flex-col gap-6 rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 sm:p-6">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-400">Cấu hình Guest</h3>
+            <div className="flex flex-col gap-6 rounded-xl border border-zinc-800 bg-zinc-900/30 p-5 sm:p-6 lg:basis-3/5">
+              <h3 className="text-base font-semibold uppercase tracking-wider text-zinc-400">Cấu hình Guest</h3>
 
               <div>
-                <label className="text-sm font-medium text-zinc-200" htmlFor="guest-path">
+                <label className="text-base font-medium text-zinc-200" htmlFor="guest-path">
                   Resource path
                 </label>
                 <input
                   id="guest-path"
                   value={resourcePath}
                   onChange={(e) => setResourcePath(e.target.value)}
-                  className="mt-2 w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 font-mono text-sm text-zinc-200 placeholder:text-zinc-600 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/40"
+                  className="mt-2 w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-2.5 font-mono text-base text-zinc-200 placeholder:text-zinc-600 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/40"
                   placeholder="v1/users"
                 />
-                <p className="mt-1.5 text-xs text-zinc-500">
+                <p className="mt-1.5 text-base text-zinc-500">
                   Mock endpoint: <span className="font-mono text-zinc-400">/api/guest/&lt;token&gt;/{resourcePath}</span>
                 </p>
               </div>
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="space-y-1">
-                  <span className="block text-xs font-medium text-zinc-400">Loại response</span>
+                  <span className="block text-base font-medium text-zinc-400">Loại response</span>
                   <NativeSelect
                     value={responsePreset}
                     onChange={(e) => setResponsePreset(e.target.value as ResponsePresetId)}
@@ -438,31 +505,32 @@ export function GuestGenerator() {
                       </option>
                     ))}
                   </NativeSelect>
-                  <span className="block text-[11px] text-zinc-500">{RESPONSE_PRESETS.find((p) => p.id === responsePreset)?.description}</span>
+                  <span className="block text-base text-zinc-500">{RESPONSE_PRESETS.find((p) => p.id === responsePreset)?.description}</span>
                 </label>
 
                 <label className="space-y-1">
-                  <span className="block text-xs font-medium text-zinc-400">Quantity (max {GUEST_MAX_ITEMS})</span>
-                  <input
-                    type="number"
+                  <span className="block text-base font-medium text-zinc-400">Số lượng (tối đa {GUEST_MAX_ITEMS})</span>
+                  <StepperInput
+                    ariaLabel="Số lượng bản ghi guest"
                     min={1}
                     max={GUEST_MAX_ITEMS}
+                    step={1}
                     disabled={!showQuantity}
                     value={showQuantity ? quantity : GUEST_MAX_ITEMS}
-                    onChange={(e) => setQuantity(Math.min(GUEST_MAX_ITEMS, Math.max(1, Number(e.target.value) || 1)))}
-                    className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-sm text-zinc-200 focus:border-violet-500/60 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                    onChange={(n) => setQuantity(Math.min(GUEST_MAX_ITEMS, Math.max(1, Math.trunc(n) || 1)))}
+                    className="h-11 w-full rounded-lg border-zinc-700 bg-zinc-900/40"
                   />
                   {!showQuantity ? (
-                    <span className="block text-[11px] text-zinc-600">Không áp dụng cho single object.</span>
+                    <span className="block text-base text-zinc-600">Không áp dụng cho single object.</span>
                   ) : (
-                    <span className="block text-[11px] text-zinc-500">Guest chỉ được chọn tối đa {GUEST_MAX_ITEMS} records.</span>
+                    <span className="block text-base text-zinc-500">Guest chỉ được chọn tối đa {GUEST_MAX_ITEMS} records.</span>
                   )}
                 </label>
               </div>
 
               <div>
                 <div className="mb-3 flex min-h-7 items-center justify-between gap-3">
-                  <span id="guest-chaos-label" className="text-sm font-medium leading-none text-zinc-200">
+                  <span id="guest-chaos-label" className="text-base font-medium leading-none text-zinc-200">
                     Mô phỏng lỗi
                   </span>
                   <Switch
@@ -486,26 +554,26 @@ export function GuestGenerator() {
                     </option>
                   ))}
                 </NativeSelect>
-                <div className="mt-1.5 text-xs text-zinc-500">
+                <div className="mt-1.5 text-base text-zinc-500">
                   {chaosEnabled ? CHAOS_CASES.find((c) => c.id === chaosCase)?.hint : "Tắt mô phỏng lỗi để preview output ổn định."}
                 </div>
               </div>
 
               <div>
                 <div className="mb-3 flex min-h-7 items-center justify-between gap-3">
-                  <span className="text-sm font-medium leading-none text-zinc-200">Fields (max {GUEST_MAX_FIELDS})</span>
+                  <span className="text-base font-medium leading-none text-zinc-200">Fields (max {GUEST_MAX_FIELDS})</span>
                   <button
                     type="button"
                     onClick={addField}
                     disabled={!canAddField}
-                    className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-zinc-800 px-3 py-1.5 text-xs font-semibold leading-none text-zinc-200 transition-colors hover:bg-zinc-800/40 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-zinc-800 px-3 py-1.5 text-base font-semibold leading-none text-zinc-200 transition-colors hover:bg-zinc-800/40 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <Plus className="h-3.5 w-3.5 shrink-0" aria-hidden />
                     Thêm field
                   </button>
                 </div>
 
-                <div className="mb-4 grid grid-cols-1 gap-2 text-zinc-500 sm:grid sm:grid-cols-[minmax(0,1fr)_10.5rem_11.5rem_2.75rem] sm:items-center sm:gap-3">
+                <div className="mb-4 grid grid-cols-1 gap-2 text-zinc-500 sm:grid sm:grid-cols-[minmax(0,1.35fr)_9.25rem_9.75rem_2.75rem] sm:items-center sm:gap-3">
                   <InlineLegendLabel
                     label="Key"
                     hintTitle='Tên field sẽ trở thành key trong JSON response (ví dụ: email → "email": ...).'
@@ -528,22 +596,22 @@ export function GuestGenerator() {
                   {fields.map((f) => (
                     <li
                       key={f.clientId}
-                      className="grid grid-cols-1 gap-2 rounded-xl border border-zinc-800/90 bg-zinc-950/40 p-3 sm:grid-cols-[minmax(0,1fr)_10.5rem_11.5rem_2.75rem] sm:items-center sm:gap-3"
+                      className="grid grid-cols-1 gap-2 rounded-xl border border-zinc-800/90 bg-zinc-950/40 p-3 sm:grid-cols-[minmax(0,1.35fr)_9.25rem_9.75rem_2.75rem] sm:items-center sm:gap-3"
                     >
                       <input
                         aria-label="Key"
                         value={f.key}
                         onChange={(e) => updateField(f.clientId, { key: e.target.value })}
-                        className="min-h-10 min-w-0 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 px-3 py-2 font-mono text-sm text-zinc-200 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30"
+                        className="min-h-11 min-w-0 w-full rounded-lg border border-zinc-700 bg-zinc-900/70 px-3 py-2.5 font-mono text-[1.05rem] text-zinc-100 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/30"
                         placeholder="email"
                       />
-                      <div className="min-w-0 w-full sm:w-[10.5rem] sm:max-w-[10.5rem] sm:justify-self-stretch">
+                      <div className="min-w-0 w-full sm:w-[9.25rem] sm:max-w-[9.25rem] sm:justify-self-stretch">
                         <NativeSelect
                           aria-label="Kiểu dữ liệu"
                           value={f.type}
                           onChange={(e) => updateField(f.clientId, { type: e.target.value as FieldFormRow["type"] })}
                           ui="zincCompact"
-                          className="!mt-0 !w-full sm:!w-full"
+                          className="!mt-0 !w-full !text-sm sm:!w-full"
                         >
                           {FIELD_TYPES.map((t) => (
                             <option key={t} value={t}>
@@ -553,14 +621,14 @@ export function GuestGenerator() {
                         </NativeSelect>
                       </div>
 
-                      <div className="min-w-0 w-full sm:w-[11.5rem] sm:max-w-[11.5rem] sm:justify-self-stretch">
+                      <div className="min-w-0 w-full sm:w-[9.75rem] sm:max-w-[9.75rem] sm:justify-self-stretch">
                         <NativeSelect
                           aria-label="Faker"
                           value={f.faker}
                           onChange={(e) => updateField(f.clientId, { faker: e.target.value })}
                           ui="zincCompact"
                           disabled={loadingHints}
-                          className="!mt-0 !w-full sm:!w-full"
+                          className="!mt-0 !w-full !text-sm sm:!w-full"
                         >
                           <option value="">Mặc định</option>
                           {hints.fakerHints.map((h) => (
@@ -584,7 +652,7 @@ export function GuestGenerator() {
                   ))}
                 </ul>
 
-                <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-950/20 p-3 text-xs text-amber-100/90">
+                <div className="mt-3 rounded-xl border border-amber-500/20 bg-amber-950/20 p-3 text-base text-amber-100/90">
                   <div className="flex gap-2">
                     <Info className="mt-px h-4 w-4 shrink-0 text-amber-200" aria-hidden />
                     <div className="min-w-0 leading-snug">
@@ -603,7 +671,7 @@ export function GuestGenerator() {
                 >
                   {releaseLoading ? "Đang release…" : "Release API (công khai)"}
                 </button>
-                <p className="mt-2 text-xs text-amber-100/90">
+                <p className="mt-2 text-base text-amber-100/90">
                   {quotaLoading
                     ? "Đang tải quota…"
                     : quotaRemaining == null
@@ -614,26 +682,34 @@ export function GuestGenerator() {
               </div>
             </div>
 
-            <div className="flex flex-1 flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/10">
+            <div className="flex flex-col overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950/10 lg:basis-2/5">
               <div className="flex min-h-10 items-center justify-between gap-3 border-b border-zinc-800/80 px-4 py-3">
-                <span className="text-sm font-semibold leading-none text-zinc-200">Live preview</span>
+                <span className="text-base font-semibold leading-none text-zinc-200">Live preview</span>
                 <button
                   type="button"
                   onClick={() => setRerollSeed((s) => s + 1)}
-                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 py-1.5 text-xs font-semibold leading-none text-zinc-200 transition-colors hover:border-violet-500/50 hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-lg border border-zinc-800 bg-zinc-950/50 px-3 py-1.5 text-base font-semibold leading-none text-zinc-200 transition-colors hover:border-violet-500/50 hover:text-white"
                 >
                   <RefreshCw className="h-3.5 w-3.5 shrink-0" aria-hidden />
                   Reroll
                 </button>
               </div>
-              <div className="min-h-[320px] flex-1 bg-zinc-950/60">
+              <div className="relative min-h-[320px] flex-1 bg-zinc-950/60">
                 <JsonPreview value={previewValue} chaosCase={chaosCase} chaosFieldKey={chaosFieldKey} />
+                {previewLoading ? (
+                  <div className="absolute inset-0 z-10 flex items-center justify-center bg-zinc-950/65 backdrop-blur-[1px]">
+                    <div className="flex flex-col items-center gap-2 rounded-lg border border-zinc-700/60 bg-zinc-900/90 px-4 py-3">
+                      <LoadingSpinner size="sm" />
+                      <span className="text-base text-zinc-300">Đang tạo preview...</span>
+                    </div>
+                  </div>
+                ) : null}
               </div>
-              <div className="border-t border-zinc-800/80 px-4 py-3 text-xs text-zinc-500">
+              <div className="border-t border-zinc-800/80 px-4 py-3 text-base text-zinc-500">
                 {releasedUrl ? (
                   <div className="space-y-2">
                     <p className="text-emerald-400 font-medium">Đã release! URL:</p>
-                    <code className="block break-all rounded-lg bg-zinc-900/80 px-3 py-2 font-mono text-[11px] text-emerald-300">
+                    <code className="block break-all rounded-lg bg-zinc-900/80 px-3 py-2 font-mono text-base text-emerald-300">
                       {releasedUrl}
                     </code>
                     {expiresAt ? <p>Còn hạn tới: {new Date(expiresAt).toLocaleTimeString()}</p> : null}
@@ -646,7 +722,7 @@ export function GuestGenerator() {
                           /* clipboard */
                         }
                       }}
-                      className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-800/40"
+                      className="rounded-lg border border-zinc-800 bg-zinc-950 px-3 py-2 text-base font-semibold text-zinc-200 hover:bg-zinc-800/40"
                     >
                       Copy URL
                     </button>
@@ -673,20 +749,20 @@ export function GuestGenerator() {
           }}
         >
           <div className="w-full max-w-lg rounded-2xl border border-zinc-800 bg-zinc-900/95 p-6 shadow-2xl">
-            <p className="text-[10px] font-medium uppercase tracking-wider text-zinc-400">
+            <p className="text-base font-medium uppercase tracking-wider text-zinc-400">
               Guest API đã sẵn sàng
             </p>
             <h3 id="guest-release-title" className="mt-1 text-lg font-semibold text-zinc-100">
               URL bạn cần gọi cuối cùng
             </h3>
-            <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+            <p className="mt-3 text-base leading-relaxed text-zinc-400">
               Cuối cùng, bạn chỉ cần gọi:
-              <span className="ml-2 inline-flex max-w-full items-center rounded-lg border border-zinc-800 bg-zinc-950/40 px-2 py-1 font-mono text-xs text-zinc-200 break-all whitespace-normal">
+              <span className="ml-2 inline-flex max-w-full items-center rounded-lg border border-zinc-800 bg-zinc-950/40 px-2 py-1 font-mono text-base text-zinc-200 break-all whitespace-normal">
                 GET {releasedUrl}
               </span>
             </p>
             {expiresAt ? (
-              <p className="mt-2 text-xs text-amber-200/90">
+              <p className="mt-2 text-base text-amber-200/90">
                 Hết hạn lúc: {new Date(expiresAt).toLocaleString()}
               </p>
             ) : null}
@@ -701,7 +777,7 @@ export function GuestGenerator() {
                     /* ignore */
                   }
                 }}
-                className="inline-flex items-center justify-center rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-xs font-semibold text-zinc-200 hover:bg-zinc-800/40"
+                className="inline-flex items-center justify-center rounded-xl border border-zinc-800 bg-zinc-950 px-3 py-2 text-base font-semibold text-zinc-200 hover:bg-zinc-800/40"
               >
                 Copy URL
               </button>
@@ -709,14 +785,14 @@ export function GuestGenerator() {
                 href={releasedUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center justify-center rounded-xl bg-violet-500/15 px-3 py-2 text-xs font-semibold text-violet-200 ring-1 ring-violet-500/30 hover:bg-violet-500/20"
+                className="inline-flex items-center justify-center rounded-xl bg-violet-500/15 px-3 py-2 text-base font-semibold text-violet-200 ring-1 ring-violet-500/30 hover:bg-violet-500/20"
               >
                 Mở URL
               </a>
               <button
                 type="button"
                 onClick={() => setReleaseDialogOpen(false)}
-                className="ml-auto inline-flex items-center justify-center rounded-xl border border-zinc-800 px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-800/40"
+                className="ml-auto inline-flex items-center justify-center rounded-xl border border-zinc-800 px-3 py-2 text-base font-semibold text-zinc-300 hover:bg-zinc-800/40"
               >
                 Đóng
               </button>

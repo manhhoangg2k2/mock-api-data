@@ -1,4 +1,4 @@
-# DevMock — code
+# PaperMock — code
 
 Monorepo **pnpm**: `apps/api` (Fastify + Postgres), `apps/web` (Vite + React), `packages/shared` (Zod DSL).
 
@@ -110,7 +110,7 @@ Web static:
 
 ```bash
 pnpm build:web      # → apps/web/dist
-pnpm --filter @devmock/web preview   # xem thử bản build (Vite preview)
+pnpm --filter @papermock/web preview   # xem thử bản build (Vite preview)
 ```
 
 ### 8. Xử lý sự cố thường gặp
@@ -121,7 +121,7 @@ pnpm --filter @devmock/web preview   # xem thử bản build (Vite preview)
 | Web “Ping /health” lỗi | API có đang chạy không? Port 3000 có trùng app khác không? Thử đổi `PORT` + `VITE_DEV_API_PROXY`. |
 | Giao diện báo **ETIMEDOUT** / timeout | **Local:** API (`pnpm dev`) chưa chạy hoặc sai port; **đừng** set `VITE_API_ORIGIN` khi dùng proxy. **Render:** service Free đang sleep — mở `https://…/health` trên trình duyệt, đợi cold start 1–2 phút rồi thử lại. |
 | `pnpm install` trên Render lệch lockfile | Commit `pnpm-lock.yaml` sau `pnpm install` local. |
-| Build API: không tìm thấy `@devmock/shared` / `packages/shared/dist` | Luôn `pnpm build` từ root (shared trước api). Không commit `*.tsbuildinfo`. |
+| Build API: không tìm thấy `@papermock/shared` / `packages/shared/dist` | Luôn `pnpm build` từ root (shared trước api). Không commit `*.tsbuildinfo`. |
 
 ---
 

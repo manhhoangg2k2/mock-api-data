@@ -15,6 +15,32 @@ function RingSpinner({ className = "" }: { className?: string }) {
   );
 }
 
+/** Lớp phủ toàn viewport — dùng khi thao tác async (đăng nhập, đăng ký) để tránh cảm giác “đơ” UI. */
+export function BlockingLoadingOverlay({
+  open,
+  message,
+}: {
+  open: boolean;
+  message: string;
+}) {
+  if (!open) return null;
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-zinc-950/80 backdrop-blur-[2px]"
+      role="alertdialog"
+      aria-modal="true"
+      aria-busy="true"
+      aria-label={message}
+    >
+      <div className="mx-4 flex max-w-sm flex-col items-center gap-5 rounded-2xl border border-zinc-700/60 bg-zinc-900/95 px-8 py-8 shadow-2xl shadow-black/50">
+        <RingSpinner />
+        <p className="text-center text-base font-medium leading-snug text-zinc-100">{message}</p>
+        <p className="text-center text-base text-zinc-500">Vui lòng không đóng tab.</p>
+      </div>
+    </div>
+  );
+}
+
 export function LoadingSpinner({ size = "md" }: { size?: "sm" | "md" }) {
   const box = size === "sm" ? "h-7 w-7" : "h-9 w-9";
   const ring = size === "sm" ? "h-4 w-4 border" : "h-5 w-5 border-2";
@@ -51,7 +77,7 @@ export function AppLoadingScreen({
         aria-label={message}
       >
         <LoadingSpinner size="md" />
-        <p className="text-center text-sm text-zinc-500">{message}</p>
+        <p className="text-center text-base text-zinc-500">{message}</p>
       </div>
     );
   }
@@ -86,12 +112,12 @@ export function AppLoadingScreen({
         {brand ? (
           <div>
             <p className="text-lg font-bold tracking-tight text-zinc-100">
-              Dev<span className="text-violet-500">M</span>ock
+              Paper<span className="text-violet-500">M</span>ock
             </p>
-            <p className="mt-2 text-sm text-zinc-500">{message}</p>
+            <p className="mt-2 text-base text-zinc-500">{message}</p>
           </div>
         ) : (
-          <p className="text-sm font-medium text-zinc-400">{message}</p>
+          <p className="text-base font-medium text-zinc-400">{message}</p>
         )}
         <div className="flex items-center gap-1.5" aria-hidden>
           {[0, 1, 2].map((i) => (

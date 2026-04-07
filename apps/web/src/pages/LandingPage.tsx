@@ -79,7 +79,7 @@ export function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-300 antialiased">
+    <div className="min-h-screen bg-zinc-950 font-sans text-zinc-300 antialiased">
       <AppBar />
       <main>
         <LandingHero />

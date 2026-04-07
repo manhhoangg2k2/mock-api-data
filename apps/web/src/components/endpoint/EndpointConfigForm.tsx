@@ -69,9 +69,9 @@ export type EndpointConfigFormProps = {
   formError?: string | null;
 };
 
-const labelSm = "mb-0.5 block text-[10px] font-semibold uppercase tracking-wide text-zinc-500";
+const labelSm = "mb-0.5 block text-base font-semibold uppercase tracking-wide text-zinc-500";
 const inputSm =
-  "h-8 w-full rounded-md border border-zinc-800 bg-zinc-800 px-2 text-xs text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25";
+  "h-8 w-full rounded-md border border-zinc-800 bg-zinc-800 px-2 text-base text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25";
 
 const PAGINATION_TOTAL_MAX = 999_999_999;
 const LATENCY_MS_MAX = 120_000;
@@ -108,7 +108,7 @@ function PaginationDefaultPageField({
           ui="zinc"
           value={String(v)}
           onChange={(e) => onChange(Number(e.target.value) || 1)}
-          className="!min-h-8 !text-xs"
+          className="!min-h-8 !text-base"
         >
           {Array.from({ length: maxPage }, (_, i) => (
             <option key={i + 1} value={String(i + 1)}>
@@ -167,15 +167,15 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
           </label>
         </div>
         {p.mockUrlPrefix ? (
-          <p className="text-[10px] leading-relaxed text-zinc-500">
+          <p className="text-base leading-relaxed text-zinc-500">
             URL mock đầy đủ:{" "}
-            <code className="break-all font-mono text-[10px] text-violet-300/90">
+            <code className="break-all font-mono text-base text-violet-300/90">
               {fullMockUrl(p.mockUrlPrefix, p.path)}
             </code>
           </p>
         ) : null}
         {p.pathInputFocused ? (
-          <p className="text-[10px] text-zinc-500">Không gõ <code className="text-zinc-400">/</code> đầu.</p>
+          <p className="text-base text-zinc-500">Không gõ <code className="text-zinc-400">/</code> đầu.</p>
         ) : null}
         <FieldError
           id="endpoint-form-error"
@@ -193,7 +193,7 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
                   key={m}
                   type="button"
                   onClick={() => p.toggleMethod(m)}
-                  className={`rounded-md border px-2 py-0.5 font-mono text-[11px] font-medium transition ${
+                  className={`rounded-md border px-2 py-0.5 font-mono text-base font-medium transition ${
                     on
                       ? "border-violet-500/55 bg-violet-500/15 text-violet-300 shadow-[inset_0_0_0_1px_rgba(139,92,246,0.28)]"
                       : "border-zinc-800 bg-zinc-900/60 text-zinc-500 hover:border-zinc-700 hover:text-zinc-400"
@@ -216,7 +216,7 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
               ui="zinc"
               value={p.responsePreset}
               onChange={(e) => p.setPreset(e.target.value as ResponsePresetId)}
-              className="!min-h-8 !rounded-md !py-1 !text-xs"
+              className="!min-h-8 !rounded-md !py-1 !text-base"
             >
               {RESPONSE_PRESETS.map((r) => (
                 <option key={r.id} value={r.id}>
@@ -275,7 +275,7 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
 
         {p.responsePreset === "custom" ? (
           <div className="space-y-2 rounded-md border border-dashed border-zinc-700 bg-zinc-900/30 p-2">
-            <div className="flex flex-wrap gap-3 text-xs text-zinc-400">
+            <div className="flex flex-wrap gap-3 text-base text-zinc-400">
               <label className="inline-flex items-center gap-1.5">
                 <input
                   type="radio"
@@ -363,7 +363,7 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
               ui="zinc"
               value={p.dataLocale}
               onChange={(e) => p.setDataLocale(e.target.value)}
-              className="!min-h-8 !text-xs"
+              className="!min-h-8 !text-base"
             >
               {p.locales.map((l) => (
                 <option key={l.code} value={l.code}>
@@ -378,7 +378,7 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
               ui="zinc"
               value={p.responseTemplateId}
               onChange={(e) => p.setResponseTemplateId(e.target.value as ResponseTemplateIdStr)}
-              className="!min-h-8 !text-xs"
+              className="!min-h-8 !text-base"
             >
               {p.templatePresets.map((tp) => (
                 <option key={tp.id} value={tp.id}>
@@ -388,11 +388,11 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
             </NativeSelect>
           </label>
         </div>
-        <p className="text-[10px] text-zinc-500">
+        <p className="text-base text-zinc-500">
           Bọc payload: raw, {"{ success, body }"}, JSON:API, custom với{" "}
           <code className="text-violet-300">$body</code>.
           <InfoPopover label="Template" panelClassName="w-64">
-            <p className="text-xs text-zinc-400">Chọn preset hoặc custom JSON có chuỗi &quot;$body&quot;.</p>
+            <p className="text-base text-zinc-400">Chọn preset hoặc custom JSON có chuỗi &quot;$body&quot;.</p>
           </InfoPopover>
         </p>
         {p.responseTemplateId === "json_api_like" ? (
@@ -408,10 +408,10 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
         ) : null}
         {p.responseTemplateId === "custom" ? (
           <label className="space-y-0.5">
-            <span className="flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-500">
+            <span className="flex items-center gap-1 text-base font-semibold uppercase tracking-wide text-zinc-500">
               Custom JSON
               <InfoPopover label="Custom" panelClassName="w-56">
-                <p className="text-xs">Phải có ít nhất một giá trị đúng bằng &quot;$body&quot;.</p>
+                <p className="text-base">Phải có ít nhất một giá trị đúng bằng &quot;$body&quot;.</p>
               </InfoPopover>
             </span>
             <textarea
@@ -420,7 +420,7 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
               rows={5}
               spellCheck={false}
               placeholder='{ "data": "$body" }'
-              className="w-full rounded-md border border-zinc-800 bg-zinc-800 p-2 font-mono text-[11px] text-zinc-200 outline-none focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25"
+              className="w-full rounded-md border border-zinc-800 bg-zinc-800 p-2 font-mono text-base text-zinc-200 outline-none focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25"
             />
           </label>
         ) : null}
@@ -433,7 +433,7 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
           <button
             type="button"
             onClick={() => p.addField()}
-            className="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-800 bg-zinc-900 px-2 text-[10px] font-medium text-zinc-400 hover:border-violet-500/45 hover:text-violet-300"
+            className="inline-flex h-7 items-center gap-1 rounded-md border border-zinc-800 bg-zinc-900 px-2 text-base font-medium text-zinc-400 hover:border-violet-500/45 hover:text-violet-300"
           >
             <IconPlus size={12} />
             Thêm
@@ -441,10 +441,10 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
         </div>
         <div className="overflow-hidden rounded-md border border-zinc-800">
           <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_28px] gap-1.5 border-b border-zinc-800 bg-zinc-900/80 px-2 py-1">
-            <span className="text-[9px] font-semibold uppercase tracking-wide text-zinc-500">Key</span>
+            <span className="text-base font-semibold uppercase tracking-wide text-zinc-500">Key</span>
             <div className="grid grid-cols-2 gap-1.5">
-              <span className="text-[9px] font-semibold uppercase tracking-wide text-zinc-500">Kiểu</span>
-              <span className="text-[9px] font-semibold uppercase tracking-wide text-zinc-500">Faker</span>
+              <span className="text-base font-semibold uppercase tracking-wide text-zinc-500">Kiểu</span>
+              <span className="text-base font-semibold uppercase tracking-wide text-zinc-500">Faker</span>
             </div>
             <span />
           </div>
@@ -473,7 +473,7 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
           setAdvancedOpen(e.currentTarget.open);
         }}
       >
-        <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-2 text-xs text-zinc-400 [&::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-2 text-base text-zinc-400 [&::-webkit-details-marker]:hidden">
           <IconGauge size={14} className="text-zinc-500" />
           Nâng cao · Latency · Roulette
         </summary>
@@ -512,13 +512,13 @@ export function EndpointConfigForm(p: EndpointConfigFormProps) {
       </details>
 
       <details className="rounded-md border border-zinc-800/80">
-        <summary className="cursor-pointer list-none px-2 py-1.5 text-[10px] text-zinc-500 [&::-webkit-details-marker]:hidden">
+        <summary className="cursor-pointer list-none px-2 py-1.5 text-base text-zinc-500 [&::-webkit-details-marker]:hidden">
           <span className="inline-flex items-center gap-1">
             <IconCode size={12} />
             schemaConfig JSON
           </span>
         </summary>
-        <pre className="max-h-40 overflow-auto border-t border-zinc-800 bg-zinc-950 p-2 font-mono text-[10px] text-zinc-500">
+        <pre className="max-h-40 overflow-auto border-t border-zinc-800 bg-zinc-950 p-2 font-mono text-base text-zinc-500">
           {p.schemaJsonPretty}
         </pre>
       </details>

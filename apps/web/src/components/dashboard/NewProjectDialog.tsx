@@ -96,7 +96,7 @@ export function NewProjectDialog({ open, onOpenChange, onCreate }: Props) {
 
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div className="space-y-1.5">
-            <label htmlFor="new-project-name" className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <label htmlFor="new-project-name" className="text-base font-medium uppercase tracking-wide text-zinc-500">
               Project name
             </label>
             <input
@@ -111,12 +111,12 @@ export function NewProjectDialog({ open, onOpenChange, onCreate }: Props) {
               placeholder="E.g. E-commerce App"
               aria-invalid={Boolean(nameError)}
               aria-describedby={nameError ? "new-project-name-err" : undefined}
-              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none ring-violet-500/0 transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30"
+              className="w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 text-base text-zinc-100 outline-none ring-violet-500/0 transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30"
             />
             <FieldError id="new-project-name-err" message={nameError} />
           </div>
           <div className="space-y-1.5">
-            <label htmlFor="new-project-desc" className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <label htmlFor="new-project-desc" className="text-base font-medium uppercase tracking-wide text-zinc-500">
               Description
             </label>
             <textarea
@@ -125,7 +125,7 @@ export function NewProjectDialog({ open, onOpenChange, onCreate }: Props) {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Mô tả ngắn (chỉ hiển thị trong UI; API hiện chưa lưu trường này)"
               rows={3}
-              className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 text-sm text-zinc-100 outline-none ring-violet-500/0 transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30"
+              className="w-full resize-none rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2.5 text-base text-zinc-100 outline-none ring-violet-500/0 transition focus:border-violet-500 focus:ring-2 focus:ring-violet-500/30"
             />
           </div>
           <div className="flex justify-end gap-2 pt-2">
@@ -133,14 +133,14 @@ export function NewProjectDialog({ open, onOpenChange, onCreate }: Props) {
               type="button"
               disabled={submitting}
               onClick={() => onOpenChange(false)}
-              className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-300 transition hover:bg-zinc-800 disabled:opacity-50"
+              className="rounded-lg border border-zinc-700 px-4 py-2 text-base font-medium text-zinc-300 transition hover:bg-zinc-800 disabled:opacity-50"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="rounded-lg bg-violet-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:bg-violet-500 disabled:opacity-50"
+              className="rounded-lg bg-violet-600 px-4 py-2 text-base font-semibold text-white shadow-lg shadow-violet-600/20 transition hover:bg-violet-500 disabled:opacity-50"
             >
               {submitting ? "Đang tạo…" : "Tạo project"}
             </button>

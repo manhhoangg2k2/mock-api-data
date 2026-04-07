@@ -2,8 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  font-size: 17px;
+}
+
 body {
-  @apply min-h-screen bg-zinc-950 font-sans text-zinc-300 antialiased;
+  @apply min-h-screen bg-zinc-950 font-sans text-base leading-normal text-zinc-300 antialiased;
+}
+
+@layer base {
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: inherit;
+  }
 }
 
 /**

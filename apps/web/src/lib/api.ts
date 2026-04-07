@@ -1,8 +1,8 @@
-const TOKEN_KEY = "devmock_token";
-const REFRESH_KEY = "devmock_refresh_token";
-const USER_KEY = "devmock_user";
+const TOKEN_KEY = "PaperMock_token";
+const REFRESH_KEY = "PaperMock_refresh_token";
+const USER_KEY = "PaperMock_user";
 
-export const SESSION_EXPIRED_EVENT = "devmock:session-expired";
+export const SESSION_EXPIRED_EVENT = "PaperMock:session-expired";
 
 export type AuthUser = {
   id: string;
@@ -129,7 +129,13 @@ export async function tryRefreshSession(): Promise<boolean> {
   return refreshPromise;
 }
 
-const AUTH_PUBLIC_PATHS = ["/v1/auth/login", "/v1/auth/register", "/v1/auth/google", "/v1/auth/refresh"];
+const AUTH_PUBLIC_PATHS = [
+  "/v1/auth/login",
+  "/v1/auth/register",
+  "/v1/auth/register/send-code",
+  "/v1/auth/google",
+  "/v1/auth/refresh",
+];
 
 function isAuthPublicPath(path: string): boolean {
   const base = path.split("?")[0] ?? path;

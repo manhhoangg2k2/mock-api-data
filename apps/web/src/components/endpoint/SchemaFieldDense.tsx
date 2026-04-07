@@ -26,7 +26,7 @@ type Props = {
 };
 
 const inputSm =
-  "h-8 w-full rounded-md border border-zinc-800 bg-zinc-800 px-2 text-xs text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25";
+  "h-9 w-full rounded-md border border-zinc-800 bg-zinc-800 px-2 text-base text-zinc-100 outline-none placeholder:text-zinc-500 focus:border-violet-500/70 focus:ring-1 focus:ring-violet-500/25";
 
 function SliderRow({
   label,
@@ -41,7 +41,7 @@ function SliderRow({
 }) {
   return (
     <div className="space-y-0.5">
-      <div className="flex justify-between gap-2 text-[10px] text-zinc-500">
+      <div className="flex justify-between gap-2 text-base text-zinc-500">
         <span>{label}</span>
         <span className="tabular-nums text-zinc-400">{value}%</span>
       </div>
@@ -98,7 +98,7 @@ export function SchemaFieldDense({
               onChange={(e) =>
                 onChange({ ...row, type: e.target.value as FieldFormRow["type"], faker: "" })
               }
-              className="!min-h-8 !w-full min-w-0 !rounded-md !py-1 !text-xs"
+              className="!min-h-8 !w-full min-w-0 !rounded-md !py-1 !text-base"
             >
               {FIELD_TYPES.map((t) => (
                 <option key={t} value={t}>
@@ -112,7 +112,7 @@ export function SchemaFieldDense({
               ui="zinc"
               value={row.faker}
               onChange={(e) => onChange({ ...row, faker: e.target.value })}
-              className="!min-h-8 !w-full min-w-0 !rounded-md !py-1 !text-xs"
+              className="!min-h-8 !w-full min-w-0 !rounded-md !py-1 !text-base"
             >
               <option value="">Faker…</option>
               {fakerHints.map((h) => (
@@ -142,28 +142,28 @@ export function SchemaFieldDense({
           setVariantsOpen(e.currentTarget.open);
         }}
       >
-        <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-1 text-[10px] text-zinc-500 [&::-webkit-details-marker]:hidden">
+        <summary className="flex cursor-pointer list-none items-center gap-2 px-2 py-1 text-base text-zinc-500 [&::-webkit-details-marker]:hidden">
           <IconZap size={12} className={variantActive ? "text-violet-400" : "text-zinc-600"} />
           <span className="font-medium tracking-wide">Mô phỏng lỗi dữ liệu</span>
           {variantActive ? (
-            <span className="rounded bg-violet-500/15 px-1 py-px text-[9px] font-semibold uppercase text-violet-300">
+            <span className="rounded bg-violet-500/15 px-1 py-px text-base font-semibold uppercase text-violet-300">
               bật
             </span>
           ) : null}
         </summary>
         <div className="space-y-3 border-l-2 border-violet-500/70 bg-zinc-900/50 px-3 py-2.5 pl-3">
-          <div className="flex flex-wrap items-center gap-1 text-[10px] leading-snug text-zinc-500">
+          <div className="flex flex-wrap items-center gap-1 text-base leading-snug text-zinc-500">
             <span>
               Ba nhánh (bỏ trường · null · giá trị xấu) không vượt quá <strong className="text-zinc-400">100%</strong> tổng;
               phần còn lại là dữ liệu chuẩn (Faker).
             </span>
             <InfoPopover label="Tóm tắt" panelClassName="w-64">
-              <p className="text-xs text-zinc-400">
+              <p className="text-base text-zinc-400">
                 Bỏ trường: thiếu key. Null: <span className="text-zinc-200">null</span>. Giá trị xấu: theo mẫu đã chọn.
               </p>
             </InfoPopover>
           </div>
-          <p className="rounded border border-zinc-800/80 bg-zinc-950/60 px-2 py-1 text-[10px] text-zinc-400">
+          <p className="rounded border border-zinc-800/80 bg-zinc-950/60 px-2 py-1 text-base text-zinc-400">
             Chuẩn (Faker):{" "}
             <span className="font-semibold tabular-nums text-emerald-400/90">{happyPercent}%</span>
           </p>
@@ -187,13 +187,13 @@ export function SchemaFieldDense({
             />
           </div>
           <label className="block space-y-0.5">
-            <span className="text-[10px] text-zinc-500">Mẫu giá trị xấu</span>
+            <span className="text-base text-zinc-500">Mẫu giá trị xấu</span>
             <NativeSelect
               ui="zinc"
               value={row.edgePreset}
               onChange={(e) => onChange({ ...row, edgePreset: e.target.value })}
               disabled={row.edgePercent <= 0}
-              className="!min-h-8 !text-xs disabled:opacity-40"
+              className="!min-h-8 !text-base disabled:opacity-40"
             >
               {edgeCatalog && edgeCatalog.length > 0
                 ? edgeCatalog.map((g) => (
@@ -213,7 +213,7 @@ export function SchemaFieldDense({
             </NativeSelect>
           </label>
           {row.edgePercent > 0 ? (
-            <p className="text-[10px] text-zinc-500">{EDGE_HELP_VI[row.edgePreset] ?? ""}</p>
+            <p className="text-base text-zinc-500">{EDGE_HELP_VI[row.edgePreset] ?? ""}</p>
           ) : null}
         </div>
       </details>

@@ -8,11 +8,11 @@ export function LandingFooter() {
   return (
     <footer className="border-t border-zinc-800/80 bg-zinc-950 px-4 py-10 sm:px-6">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-4 sm:flex-row">
-        <p className="text-sm text-zinc-500">© {year} DevMock. All rights reserved.</p>
+        <p className="text-base text-zinc-500">© {year} PaperMock. All rights reserved.</p>
         <div className="flex flex-wrap items-center justify-center gap-6">
           <Link
             to="/docs"
-            className="text-sm font-medium text-zinc-400 transition-colors hover:text-violet-400"
+            className="text-base font-medium text-zinc-400 transition-colors hover:text-violet-400"
           >
             Hướng dẫn
           </Link>
@@ -20,7 +20,7 @@ export function LandingFooter() {
             href={GITHUB_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm font-medium text-zinc-400 transition-colors hover:text-violet-400"
+            className="text-base font-medium text-zinc-400 transition-colors hover:text-violet-400"
           >
             GitHub
           </a>

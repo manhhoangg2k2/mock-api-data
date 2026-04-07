@@ -8,10 +8,10 @@ const CHEVRON_BASE =
   "appearance-none bg-[length:1rem_1rem] bg-[position:right_0.65rem_center] bg-no-repeat pr-10";
 
 const UI_CLASS = {
-  zinc: `${CHEVRON_BASE} w-full min-h-10 rounded-xl border border-zinc-800 bg-zinc-950 pl-3 py-2 text-sm text-zinc-200 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/40 disabled:cursor-not-allowed disabled:opacity-50`,
-  zincCompact: `${CHEVRON_BASE} mt-2 min-h-10 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 pl-3 py-2 text-sm text-zinc-200 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30 disabled:cursor-not-allowed disabled:opacity-50 sm:mt-0 sm:w-auto`,
-  surface: `${CHEVRON_BASE} w-full min-h-10 rounded-xl border border-zinc-800 bg-zinc-950 pl-3 py-2.5 text-sm text-zinc-100 outline-none focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/35 disabled:cursor-not-allowed disabled:opacity-50`,
-  surfaceRaised: `${CHEVRON_BASE} w-full min-h-10 rounded-xl border border-zinc-800 bg-zinc-900 pl-3 py-2 text-sm text-zinc-100 outline-none focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/35 disabled:cursor-not-allowed disabled:opacity-50`,
+  zinc: `${CHEVRON_BASE} w-full min-h-10 rounded-xl border border-zinc-800 bg-zinc-950 pl-3 py-2 text-base text-zinc-200 focus:border-violet-500/60 focus:outline-none focus:ring-1 focus:ring-violet-500/40 disabled:cursor-not-allowed disabled:opacity-50`,
+  zincCompact: `${CHEVRON_BASE} mt-2 min-h-10 w-full rounded-lg border border-zinc-800 bg-zinc-900/60 pl-3 py-2 text-base text-zinc-200 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30 disabled:cursor-not-allowed disabled:opacity-50 sm:mt-0 sm:w-auto`,
+  surface: `${CHEVRON_BASE} w-full min-h-10 rounded-xl border border-zinc-800 bg-zinc-950 pl-3 py-2.5 text-base text-zinc-100 outline-none focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/35 disabled:cursor-not-allowed disabled:opacity-50`,
+  surfaceRaised: `${CHEVRON_BASE} w-full min-h-10 rounded-xl border border-zinc-800 bg-zinc-900 pl-3 py-2 text-base text-zinc-100 outline-none focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/35 disabled:cursor-not-allowed disabled:opacity-50`,
 } as const;
 
 export type NativeSelectUI = keyof typeof UI_CLASS;

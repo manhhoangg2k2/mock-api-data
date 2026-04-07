@@ -63,7 +63,7 @@ export function buildGuestPreviewObject(
       if (isBad) {
         const mode = Math.floor(rand(seed + 2) * 3);
         out[f.key] =
-          mode === 0 ? "" : mode === 1 ? "not-an-email" : "invalid@@devmock.local";
+          mode === 0 ? "" : mode === 1 ? "not-an-email" : "invalid@@PaperMock.local";
       } else {
         const local = randomString(seed + 3).replace(/[^a-z0-9-]/gi, "");
         out[f.key] = `${local}@example.com`;
@@ -81,6 +81,6 @@ export function isEmailChaosLine(line: string): boolean {
   return (
     line.includes('""') ||
     line.includes('"not-an-email"') ||
-    line.includes('"invalid@@devmock.local"')
+    line.includes('"invalid@@PaperMock.local"')
   );
 }

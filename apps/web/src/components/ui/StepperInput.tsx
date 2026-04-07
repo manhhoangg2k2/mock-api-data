@@ -15,7 +15,7 @@ const btnBase =
   "flex shrink-0 items-center justify-center border-zinc-700 bg-zinc-900 text-zinc-400 outline-none transition hover:bg-zinc-800 hover:text-zinc-100 focus-visible:ring-1 focus-visible:ring-violet-500/50 disabled:pointer-events-none disabled:opacity-35";
 
 const inputBase =
-  "min-w-0 flex-1 border-x border-zinc-700 bg-zinc-800 py-0 text-center text-xs text-zinc-100 outline-none focus:z-[1] focus:border-violet-500/50 focus:ring-1 focus:ring-inset focus:ring-violet-500/30 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none";
+  "min-w-0 flex-1 border-x border-zinc-700 bg-zinc-800 py-0 text-center text-base text-zinc-100 outline-none focus:z-[1] focus:border-violet-500/50 focus:ring-1 focus:ring-inset focus:ring-violet-500/30 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none";
 
 export function StepperInput({
   value,

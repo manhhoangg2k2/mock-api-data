@@ -425,13 +425,13 @@ export function EndpointCreatePanel({ projectId, mockUrlPrefix, onCreated, onErr
         <div className="flex min-w-0 flex-col rounded-md border border-zinc-800 bg-zinc-950 lg:col-span-3">
           <div className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 bg-zinc-950/95 px-3 py-2.5 backdrop-blur-md">
             <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-              <h2 className="truncate text-sm font-semibold tracking-tight text-zinc-100">
+              <h2 className="truncate text-base font-semibold tracking-tight text-zinc-100">
                 Cấu hình Endpoint
               </h2>
               <button
                 type="button"
                 onClick={() => setTourOpen(true)}
-                className="inline-flex shrink-0 items-center gap-2 rounded-lg border-2 border-violet-500/65 bg-gradient-to-br from-violet-950/85 to-zinc-900 px-3 py-2 text-xs font-semibold text-violet-100 shadow-md shadow-violet-950/40 ring-1 ring-violet-400/25 transition hover:border-violet-400 hover:from-violet-900/90 hover:text-white"
+                className="inline-flex shrink-0 items-center gap-2 rounded-lg border-2 border-violet-500/65 bg-gradient-to-br from-violet-950/85 to-zinc-900 px-3 py-2 text-base font-semibold text-violet-100 shadow-md shadow-violet-950/40 ring-1 ring-violet-400/25 transition hover:border-violet-400 hover:from-violet-900/90 hover:text-white"
                 title="Hướng dẫn từng bước — path, body, preview, mô phỏng lỗi…"
               >
                 <IconHelpCircle size={16} className="text-violet-300" aria-hidden />
@@ -441,7 +441,7 @@ export function EndpointCreatePanel({ projectId, mockUrlPrefix, onCreated, onErr
             <div className="flex shrink-0 items-center gap-2">
               <Link
                 to={`/projects/${projectId}`}
-                className="rounded border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
+                className="rounded border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-base font-medium text-zinc-400 hover:border-zinc-700 hover:text-zinc-200"
               >
                 Hủy
               </Link>
@@ -449,7 +449,7 @@ export function EndpointCreatePanel({ projectId, mockUrlPrefix, onCreated, onErr
                 type="submit"
                 form={FORM_ID}
                 disabled={submitting}
-                className="rounded bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-violet-900/30 hover:bg-violet-500 disabled:opacity-50"
+                className="rounded bg-violet-600 px-3 py-1.5 text-base font-semibold text-white shadow-sm shadow-violet-900/30 hover:bg-violet-500 disabled:opacity-50"
               >
                 {submitting ? "Đang lưu…" : "Lưu endpoint"}
               </button>

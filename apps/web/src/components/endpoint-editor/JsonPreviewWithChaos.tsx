@@ -18,11 +18,11 @@ export function JsonPreviewWithChaos({
     <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-md border border-zinc-800 bg-zinc-950">
       <div className="min-h-[200px] flex-1 overflow-auto p-3">
         {loading ? (
-          <p className="font-mono text-xs text-zinc-500">Đang sinh preview…</p>
+          <p className="font-mono text-base text-zinc-500">Đang sinh preview…</p>
         ) : lines.length === 0 ? (
-          <p className="font-mono text-xs text-zinc-600">Chưa có dữ liệu.</p>
+          <p className="font-mono text-base text-zinc-600">Chưa có dữ liệu.</p>
         ) : (
-          <pre className="m-0 font-mono text-xs leading-relaxed sm:text-[0.8125rem]">
+          <pre className="m-0 font-mono text-base leading-relaxed sm:text-base">
             <code>
               {lines.map((line, i) => {
                 const bad = highlightRows.has(i);
